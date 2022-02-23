@@ -24,8 +24,8 @@ export class FileSystemDirectoryDatapack implements Datapack{
         }
     }
 
-    async has(type: DataType, id: string): Promise<boolean> {        
-        return this.getFile(type, id) !== undefined
+    async has(type: DataType, id: string): Promise<boolean> {  
+        return (await this.getFile(type, id)) !== undefined
     }
 
     async getIds(type: DataType): Promise<string[]> {
@@ -76,26 +76,47 @@ export class FileSystemDirectoryDatapack implements Datapack{
         }
     }
 
-    private async getFile(type: DataType, id: string): Promise<FileSystemFileHandle | undefined>{
-        const [namespace, name] = id.split(":", 2)
-        var directory = await (await this.getParentDirectory()).getDirectoryHandle(namespace)
-        if (directory === undefined) return undefined
-
-        const dirs = type.split("/")
-        const name_parts = name.split("/")
-        const filename = name_parts.pop()
-        if (filename === undefined) return undefined
-
-        dirs.push(...name_parts)
-
-        console.log(dirs)
-        for (const dir of dirs){
-            directory = await (directory.getDirectoryHandle(dir))
-            console.log(directory)
-            if (directory === undefined) return undefined
+    async save?(type: DataType, id: string, data: typeof type extends JsonDataType ? unknown : ArrayBuffer): Promise<void> {
+        const file = await this.getFile(type, id, true)
+        if (file === undefined){
+            throw new Error("Could not save file");
+            
+        }
+        const fileType = getFileType(type)
+        var output: string | ArrayBuffer
+        if (fileType == "json"){
+            output = JSON.stringify(data, null, 2)
+        } else {
+            output = data
         }
 
-        const file = await (directory.getFileHandle(filename + "." + getFileType(type)))
-        return file
+        const writable = await file?.createWritable();
+        await writable.write(output)
+        await writable.close()
+    }
+
+    private async getFile(type: DataType, id: string, create: boolean = false): Promise<FileSystemFileHandle | undefined>{
+        try{
+            const [namespace, name] = id.split(":", 2)
+            var directory = await (await this.getParentDirectory()).getDirectoryHandle(namespace, {create: create})
+            if (directory === undefined) return undefined
+
+            const dirs = type.split("/")
+            const name_parts = name.split("/")
+            const filename = name_parts.pop()
+            if (filename === undefined) return undefined
+
+            dirs.push(...name_parts)
+
+            for (const dir of dirs){
+                directory = await (directory.getDirectoryHandle(dir, {create: create}))
+                if (directory === undefined) return undefined
+            }
+
+            const file = await (directory.getFileHandle(filename + "." + getFileType(type), {create: create}))
+            return file
+        } catch {
+            return undefined
+        }
     }
 }
