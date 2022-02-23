@@ -1,0 +1,31 @@
+{
+  "name": "mc-datapack-loader",
+  "version": "0.1.0",
+  "main": "dist/mc-datapack-loader.cjs.js",
+  "module": "dist/mc-datapack-loader.esm.js",
+  "browser": "dist/mc-datapack-loader.umd.js",
+  "types": "dist/mc-datapack-loader.d.ts",
+  "dependencies": {
+    "jszip": "^3.6.0"
+  },
+  "devDependencies": {
+    "@types/wicg-file-system-access": "^2020.9.4",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@rollup/plugin-typescript": "^8.3.0",
+    "rollup-plugin-dts": "^4.1.0",
+    "rollup": "^2.68.0",
+    "ts-node": "^7.0.1",
+    "tslib": "^1.9.3",
+    "typescript": "^4.5.5"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "ts-node test/test.ts",
+    "pretest": "npm run build"
+  },
+  "files": [
+    "dist"
+  ]
+}
