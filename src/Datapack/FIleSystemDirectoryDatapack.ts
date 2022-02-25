@@ -76,23 +76,34 @@ export class FileSystemDirectoryDatapack implements Datapack{
         }
     }
 
-    async save?(type: DataType, id: string, data: typeof type extends JsonDataType ? unknown : ArrayBuffer): Promise<void> {
-        const file = await this.getFile(type, id, true)
-        if (file === undefined){
-            throw new Error("Could not save file");
-            
-        }
-        const fileType = getFileType(type)
-        var output: string | ArrayBuffer
-        if (fileType == "json"){
-            output = JSON.stringify(data, null, 2)
-        } else {
-            output = data
-        }
+    async save?(type: DataType, id: string, data: typeof type extends JsonDataType ? unknown : ArrayBuffer): Promise<boolean> {
+        try{
+            const file = await this.getFile(type, id, true)
+            if (file === undefined){
+                return false
+            }
 
-        const writable = await file?.createWritable();
-        await writable.write(output)
-        await writable.close()
+            const fileType = getFileType(type)
+            var output: string | ArrayBuffer
+            if (fileType == "json"){
+                output = JSON.stringify(data, null, 2)
+            } else {
+                output = data
+            }
+
+            var writable
+            try{
+                writable = await file?.createWritable();
+                await writable.write(output)
+                await writable.close()
+            } catch (e){
+                writable?.abort()
+                return false
+            }
+            return true
+       } catch (e) {
+            return false
+        }
     }
 
     private async getFile(type: DataType, id: string, create: boolean = false): Promise<FileSystemFileHandle | undefined>{

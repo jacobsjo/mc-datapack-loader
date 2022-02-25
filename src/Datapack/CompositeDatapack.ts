@@ -28,4 +28,18 @@ export class CompositeDatapack implements Datapack{
         }
         return this.readers[hasIndex].get(type, id)
     }
+
+    canSave(){
+        const canSave = this.readers.map(reader => reader.save !== undefined)
+        return canSave.includes(true)
+    }
+
+    async save?(type: DataType, id: string, data: typeof type extends JsonDataType ? unknown : ArrayBuffer): Promise<boolean> {
+        const canSave = this.readers.map(reader => reader.save !== undefined)
+        const canSaveIndex = canSave.lastIndexOf(true)
+        if (canSaveIndex === -1){
+            return false
+        }
+        return await this.readers[canSaveIndex].save!(type, id, data)
+    }
 }

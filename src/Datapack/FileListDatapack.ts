@@ -37,8 +37,6 @@ export class FileListDatapack implements Datapack{
     }
 
     async get(type: DataType, id: string): Promise<(typeof type extends JsonDataType ? unknown : ArrayBuffer) | undefined> {
-        console.log(this.directoryName)
-        console.log(idToPath(type, id))
         const file = this.files.find(file => file.webkitRelativePath === this.directoryName + "/" + idToPath(type, id))
         if (!file)
             return undefined
