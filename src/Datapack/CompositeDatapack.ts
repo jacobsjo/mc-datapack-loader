@@ -42,4 +42,14 @@ export class CompositeDatapack implements Datapack{
         }
         return await this.readers[canSaveIndex].save!(type, id, data)
     }
+
+    async prepareSave(){
+        const canSave = this.readers.map(reader => reader.save !== undefined)
+        const canSaveIndex = canSave.lastIndexOf(true)
+        if (canSaveIndex === -1){
+            return
+        }
+        await this.readers[canSaveIndex].prepareSave?.()
+    }
+
 }

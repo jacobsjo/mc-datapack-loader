@@ -6,4 +6,5 @@ export interface Datapack{
     get(type: DataType, id: string): Promise<(typeof type extends JsonDataType ? unknown : ArrayBuffer) | undefined>
 
     save?(type: DataType, id: string, data: typeof type extends JsonDataType ? unknown : ArrayBuffer): Promise<boolean>
+    prepareSave?(): Promise<void>
 }

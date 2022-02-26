@@ -106,6 +106,10 @@ export class FileSystemDirectoryDatapack implements Datapack{
         }
     }
 
+    async prepareSave(){
+        await this.directory.requestPermission({mode: 'readwrite'})
+    }
+
     private async getFile(type: DataType, id: string, create: boolean = false): Promise<FileSystemFileHandle | undefined>{
         try{
             const [namespace, name] = id.split(":", 2)
