@@ -6,15 +6,16 @@
   "browser": "dist/mc-datapack-loader.umd.js",
   "types": "dist/mc-datapack-loader.d.ts",
   "dependencies": {
+    "comment-json": "^4.2.2",
     "jszip": "^3.6.0"
   },
   "devDependencies": {
-    "@types/wicg-file-system-access": "^2020.9.4",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-node-resolve": "^13.1.3",
     "@rollup/plugin-typescript": "^8.3.0",
-    "rollup-plugin-dts": "^4.1.0",
+    "@types/wicg-file-system-access": "^2020.9.4",
     "rollup": "^2.68.0",
+    "rollup-plugin-dts": "^4.1.0",
     "ts-node": "^7.0.1",
     "tslib": "^1.9.3",
     "typescript": "^4.5.5"

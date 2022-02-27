@@ -1,3 +1,4 @@
+import { CommentJSONValue, parse, stringify } from "comment-json"
 import { DataType, JsonDataType } from "../DataType"
 import { getFileType, idToPath } from "../util"
 import { Datapack } from "./Datapack"
@@ -57,12 +58,12 @@ export class FileSystemDirectoryDatapack implements Datapack{
                 }
             }
        
-            addDir(namespace, "", directory)
+            await addDir(namespace, "", directory)
         }
         return ids
     }
 
-    async get(type: DataType, id: string): Promise<(typeof type extends JsonDataType ? unknown : ArrayBuffer) | undefined> {
+    async get(type: DataType, id: string): Promise<CommentJSONValue | unknown | ArrayBuffer> {
         const file = await this.getFile(type, id)
         if (file === undefined) return undefined
 
@@ -70,13 +71,13 @@ export class FileSystemDirectoryDatapack implements Datapack{
             return undefined
         const fileType = getFileType(type)
         if (fileType == "json"){
-            return JSON.parse(await (await file.getFile()).text())
+            return parse(await (await file.getFile()).text())
         } else {
             return await (await file.getFile()).arrayBuffer()
         }
     }
 
-    async save?(type: DataType, id: string, data: typeof type extends JsonDataType ? unknown : ArrayBuffer): Promise<boolean> {
+    async save?(type: DataType, id: string, data: CommentJSONValue | unknown | ArrayBuffer): Promise<boolean> {
         try{
             const file = await this.getFile(type, id, true)
             if (file === undefined){
@@ -84,11 +85,11 @@ export class FileSystemDirectoryDatapack implements Datapack{
             }
 
             const fileType = getFileType(type)
-            var output: string | ArrayBuffer
+            var output: FileSystemWriteChunkType
             if (fileType == "json"){
-                output = JSON.stringify(data, null, 2)
+                output = stringify(data, null, 2)
             } else {
-                output = data
+                output = (data as ArrayBuffer)
             }
 
             var writable

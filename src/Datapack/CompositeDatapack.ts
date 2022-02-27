@@ -1,3 +1,4 @@
+import { CommentJSONValue } from "comment-json"
 import { DataType, JsonDataType } from "../DataType"
 import { Datapack } from "./Datapack"
 
@@ -15,7 +16,7 @@ export class CompositeDatapack implements Datapack{
         return [... new Set( (await Promise.all(this.readers.map(reader => reader.getIds(type)))).flat())]
     }
 
-    async get(type: DataType, id: string): Promise<(typeof type extends JsonDataType ? unknown : ArrayBuffer) | undefined> {
+    async get(type: DataType, id: string): Promise<CommentJSONValue | unknown | ArrayBuffer> {
         const has = await Promise.all(this.readers.map(reader => reader.has(type, id)))
 
         if (type.startsWith("tags/")){

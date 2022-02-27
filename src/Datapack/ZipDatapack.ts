@@ -1,3 +1,4 @@
+import { CommentJSONValue, parse } from "comment-json";
 import jszip from "jszip";
 import { DataType } from "../DataType";
 import { getFileType, idToPath } from "../util";
@@ -45,14 +46,14 @@ export class ZipDatapack implements Datapack{
         })
     }
 
-    async get(type: DataType, id: string): Promise<ArrayBuffer | undefined> {
+    async get(type: DataType, id: string): Promise<CommentJSONValue | unknown | ArrayBuffer> {
         const file = this.zip.files[this.datapackName + idToPath(type, id)]
         if (!file)
             return undefined
             
         const fileType = getFileType(type)
         if (fileType == "json"){
-            return JSON.parse(await file.async("string"))
+            return parse(await file.async("string"))
         } else {
             return await file.async("arraybuffer")
         }

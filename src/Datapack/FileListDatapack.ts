@@ -1,3 +1,4 @@
+import { CommentJSONValue, parse } from "comment-json"
 import { DataType, JsonDataType } from "../DataType"
 import { getFileType, idToPath } from "../util"
 import { Datapack } from "./Datapack"
@@ -36,13 +37,13 @@ export class FileListDatapack implements Datapack{
         })
     }
 
-    async get(type: DataType, id: string): Promise<(typeof type extends JsonDataType ? unknown : ArrayBuffer) | undefined> {
+    async get(type: DataType, id: string): Promise<CommentJSONValue | ArrayBuffer | undefined> {
         const file = this.files.find(file => file.webkitRelativePath === this.directoryName + "/" + idToPath(type, id))
         if (!file)
             return undefined
         const fileType = getFileType(type)
         if (fileType == "json"){
-            return JSON.parse(await file.text())
+            return parse(await file.text())
         } else {
             return await file.arrayBuffer()
         }
