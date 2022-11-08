@@ -5,9 +5,11 @@
   "module": "dist/mc-datapack-loader.esm.js",
   "browser": "dist/mc-datapack-loader.umd.js",
   "types": "dist/mc-datapack-loader.d.ts",
+  "license": "MIT",
   "dependencies": {
-    "comment-json": "^4.2.2",
-    "jszip": "^3.6.0"
+    "deepslate": "^0.13.2",
+    "jszip": "^3.6.0",
+    "strip-json-comments": "^5.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^21.0.1",

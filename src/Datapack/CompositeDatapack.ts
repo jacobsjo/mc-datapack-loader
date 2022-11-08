@@ -1,4 +1,4 @@
-import { CommentJSONValue } from "comment-json"
+import { Identifier } from "deepslate"
 import { DataType, JsonDataType } from "../DataType"
 import { Datapack } from "./Datapack"
 
@@ -7,16 +7,16 @@ export class CompositeDatapack implements Datapack{
         public readers: Datapack[] = []
     ){}
 
-    async has(type: DataType, id: string): Promise<boolean> {
+    async has(type: DataType, id: Identifier): Promise<boolean> {
         const has = await Promise.all(this.readers.map(reader => reader.has(type, id)))
         return has.includes(true)
     }
 
-    async getIds(type: DataType): Promise<string[]> {
+    async getIds(type: DataType): Promise<Identifier[]> {
         return [... new Set( (await Promise.all(this.readers.map(reader => reader.getIds(type)))).flat())]
     }
 
-    async get(type: DataType, id: string): Promise<CommentJSONValue | unknown | ArrayBuffer> {
+    async get(type: DataType, id: Identifier): Promise<unknown | ArrayBuffer> {
         const has = await Promise.all(this.readers.map(reader => reader.has(type, id)))
 
         if (type.startsWith("tags/")){
@@ -35,7 +35,7 @@ export class CompositeDatapack implements Datapack{
         return canSave.includes(true)
     }
 
-    async save?(type: DataType, id: string, data: typeof type extends JsonDataType ? unknown : ArrayBuffer): Promise<boolean> {
+    async save?(type: DataType, id: Identifier, data: typeof type extends JsonDataType ? unknown : ArrayBuffer): Promise<boolean> {
         const canSave = this.readers.map(reader => reader.save !== undefined)
         const canSaveIndex = canSave.lastIndexOf(true)
         if (canSaveIndex === -1){

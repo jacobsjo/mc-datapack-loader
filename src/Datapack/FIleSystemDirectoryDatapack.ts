@@ -1,4 +1,5 @@
-import { CommentJSONValue, parse, stringify } from "comment-json"
+import { Identifier } from "deepslate"
+import stripJsonComments from "strip-json-comments"
 import { DataType, JsonDataType } from "../DataType"
 import { getFileType, idToPath } from "../util"
 import { Datapack } from "./Datapack"
@@ -9,7 +10,9 @@ interface MyFile extends File{
 
 export class FileSystemDirectoryDatapack implements Datapack{
     constructor(
-        private directory: FileSystemDirectoryHandle
+        private directory: FileSystemDirectoryHandle,
+        private parser: (str: string) => unknown = (str) => JSON.parse(stripJsonComments(str)),
+        private stringifier: (value: any) => string = (value) => JSON.stringify(value, null, 2)
     ){}
 
 
@@ -25,19 +28,19 @@ export class FileSystemDirectoryDatapack implements Datapack{
         }
     }
 
-    async has(type: DataType, id: string): Promise<boolean> {  
+    async has(type: DataType, id: Identifier): Promise<boolean> {  
         return (await this.getFile(type, id)) !== undefined
     }
 
-    async getIds(type: DataType): Promise<string[]> {
+    async getIds(type: DataType): Promise<Identifier[]> {
         const type_dirs = type.split("/")
 
-        const ids: string[] = []
+        const ids: Identifier[] = []
 
         const addDir = async (namespace: string, path: string, directory: FileSystemDirectoryHandle) => {
             for await (const [name, e] of (await directory.entries())){
                 if (e.kind === "file"){
-                    ids.push(namespace + ":" + path + name.substr(0, name.lastIndexOf(".")))
+                    ids.push(new Identifier(namespace, path + name.substr(0, name.lastIndexOf("."))))
                 } else {
                     await addDir(namespace, path + name + "/", e)
                 }
@@ -63,7 +66,7 @@ export class FileSystemDirectoryDatapack implements Datapack{
         return ids
     }
 
-    async get(type: DataType, id: string): Promise<CommentJSONValue | unknown | ArrayBuffer> {
+    async get(type: DataType, id: Identifier): Promise<unknown | ArrayBuffer> {
         const file = await this.getFile(type, id)
         if (file === undefined) return undefined
 
@@ -71,13 +74,13 @@ export class FileSystemDirectoryDatapack implements Datapack{
             return undefined
         const fileType = getFileType(type)
         if (fileType == "json"){
-            return parse(await (await file.getFile()).text())
+            return this.parser(await (await file.getFile()).text())
         } else {
             return await (await file.getFile()).arrayBuffer()
         }
     }
 
-    async save?(type: DataType, id: string, data: CommentJSONValue | unknown | ArrayBuffer): Promise<boolean> {
+    async save?(type: DataType, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean> {
         try{
             const file = await this.getFile(type, id, true)
             if (file === undefined){
@@ -87,7 +90,8 @@ export class FileSystemDirectoryDatapack implements Datapack{
             const fileType = getFileType(type)
             var output: FileSystemWriteChunkType
             if (fileType == "json"){
-                output = stringify(data, null, 2)
+                JSON.stringify
+                output = this.stringifier(data)
             } else {
                 output = (data as ArrayBuffer)
             }
@@ -111,14 +115,13 @@ export class FileSystemDirectoryDatapack implements Datapack{
         await this.directory.requestPermission({mode: 'readwrite'})
     }
 
-    private async getFile(type: DataType, id: string, create: boolean = false): Promise<FileSystemFileHandle | undefined>{
+    private async getFile(type: DataType, id: Identifier, create: boolean = false): Promise<FileSystemFileHandle | undefined>{
         try{
-            const [namespace, name] = id.split(":", 2)
-            var directory = await (await this.getParentDirectory()).getDirectoryHandle(namespace, {create: create})
+            var directory = await (await this.getParentDirectory()).getDirectoryHandle(id.namespace, {create: create})
             if (directory === undefined) return undefined
 
             const dirs = type.split("/")
-            const name_parts = name.split("/")
+            const name_parts = id.path.split("/")
             const filename = name_parts.pop()
             if (filename === undefined) return undefined
 

@@ -1,11 +1,11 @@
-import { CommentJSONValue } from "comment-json";
+import { Identifier } from "deepslate";
 import { DataType, JsonDataType, NbtDataType } from "../DataType";
 
 export interface Datapack{
-    has(type: DataType, id: string): Promise<boolean>
-    getIds(type: DataType): Promise<string[]>
-    get(type: DataType, id: string): Promise<CommentJSONValue | unknown | ArrayBuffer>
+    has(type: DataType, id: Identifier): Promise<boolean>
+    getIds(type: DataType): Promise<Identifier[]>
+    get(type: DataType, id: Identifier): Promise<unknown | ArrayBuffer>
 
-    save?(type: DataType, id: string, data: unknown | CommentJSONValue | ArrayBuffer): Promise<boolean>
+    save?(type: DataType, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean>
     prepareSave?(): Promise<void>
 }
