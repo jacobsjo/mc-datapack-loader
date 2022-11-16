@@ -1,6 +1,7 @@
 import { Identifier } from "deepslate"
 import stripJsonComments from "strip-json-comments"
 import { DataType, JsonDataType } from "../DataType"
+import { UNKOWN_PACK } from "../unkown_pack"
 import { getFileType, idToPath } from "../util"
 import { Datapack } from "./Datapack"
 
@@ -9,6 +10,7 @@ interface MyFile extends File{
 }
 
 export class FileListDatapack implements Datapack{
+    private baseDirectoryName: string
     private directoryName: string
 
     private files: MyFile[]
@@ -18,9 +20,31 @@ export class FileListDatapack implements Datapack{
         private parser: (str: string) => unknown = (str) => JSON.parse(stripJsonComments(str)),
     ){
         this.files = files.map(f => <MyFile>f)
-        this.directoryName = this.files[0].webkitRelativePath.split("/")[0]
-        if (this.directoryName !== "data"){
-            this.directoryName += "/data"
+        this.baseDirectoryName = this.files[0].webkitRelativePath.split("/")[0]
+        this.directoryName = this.baseDirectoryName + "/data"
+    }
+
+    async getImage(): Promise<string> {
+        const filename = this.baseDirectoryName + "/pack.png"
+        const file = this.files.find(file => file.webkitRelativePath === filename)
+        if (file){
+            return URL.createObjectURL(file)
+        } else {
+            return UNKOWN_PACK
+        }
+    }
+
+    async getName(): Promise<string> {
+        return this.baseDirectoryName === "" ? "Datapack loaded from folder" : this.baseDirectoryName
+    }
+
+    async getMcmeta(): Promise<unknown> {
+        const filename = this.baseDirectoryName + "/pack.mcmeta"
+        const file = this.files.find(file => file.webkitRelativePath === filename)
+        if (file){
+            return this.parser(await file.text())
+        } else {
+            return {}
         }
     }
 

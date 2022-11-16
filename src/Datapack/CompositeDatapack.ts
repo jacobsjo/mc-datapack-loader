@@ -1,11 +1,28 @@
 import { Identifier } from "deepslate"
 import { DataType, JsonDataType } from "../DataType"
+import { UNKOWN_PACK } from "../unkown_pack"
 import { Datapack } from "./Datapack"
 
 export class CompositeDatapack implements Datapack{
     constructor (
         public readers: Datapack[] = []
     ){}
+    
+    async getImage(): Promise<string> {
+        return UNKOWN_PACK
+    }
+
+    async getName(): Promise<string> {
+        return `[${this.readers.map(r => r.getName()).join(", ")}]`
+    }
+
+    async getMcmeta(): Promise<unknown> {
+        return {
+            pack: {
+                description: "Combination of multiple datapacks",
+            }
+        }
+    }
 
     async has(type: DataType, id: Identifier): Promise<boolean> {
         const has = await Promise.all(this.readers.map(reader => reader.has(type, id)))
