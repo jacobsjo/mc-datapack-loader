@@ -13,10 +13,12 @@ export type JsonDataType =
     "tags/items" | 
     "tags/worldgen/biome" | 
     "tags/worldgen/configured_structure_feature" | 
+    "tags/worldgen/structure" |
     "worldgen/biome" | 
     "worldgen/configured_carver" | 
     "worldgen/configured_feature" | 
     "worldgen/configured_structure_feature" | 
+    "worldgen/structure" |
     "worldgen/density_function" | 
     "worldgen/noise" | 
     "worldgen/noise_settings" | 

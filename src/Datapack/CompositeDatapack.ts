@@ -37,14 +37,36 @@ export class CompositeDatapack implements Datapack{
         const has = await Promise.all(this.readers.map(reader => reader.has(type, id)))
 
         if (type.startsWith("tags/")){
-            console.warn("Tags are not supported yet")
-        }
+            var list: string[] = []
+            var has_replace: boolean = false
+            for (const i in has){
+                if (!has[i])
+                    continue
 
-        const hasIndex = has.lastIndexOf(true)
-        if (hasIndex < 0){
-            return undefined
+                const json = (await this.readers[i].get(type, id)) as any
+                if (!json){
+                    console.warn(`Error reading ${type} ${id} from datapack ${i}`)
+                    continue
+                }
+
+                if (json?.replace){
+                    list = []
+                    has_replace = true
+                }
+
+                list += json?.values
+            }
+            return {
+                replace: has_replace,
+                values: list
+            }
+        } else {
+            const hasIndex = has.lastIndexOf(true)
+            if (hasIndex < 0){
+                return undefined
+            }
+            return this.readers[hasIndex].get(type, id)
         }
-        return this.readers[hasIndex].get(type, id)
     }
 
     canSave(){

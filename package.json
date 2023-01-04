@@ -8,19 +8,19 @@
   "license": "MIT",
   "dependencies": {
     "deepslate": "^0.13.2",
-    "jszip": "^3.6.0",
+    "jszip": "^3.10.1",
     "strip-json-comments": "^5.0.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^21.0.1",
-    "@rollup/plugin-node-resolve": "^13.1.3",
-    "@rollup/plugin-typescript": "^8.3.0",
-    "@types/wicg-file-system-access": "^2020.9.4",
-    "rollup": "^2.68.0",
-    "rollup-plugin-dts": "^4.1.0",
+    "@rollup/plugin-commonjs": "^21.1.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-typescript": "^8.5.0",
+    "@types/wicg-file-system-access": "^2020.9.5",
+    "rollup": "^2.79.1",
+    "rollup-plugin-dts": "^4.2.3",
     "ts-node": "^7.0.1",
-    "tslib": "^1.9.3",
-    "typescript": "^4.5.5"
+    "tslib": "^1.14.1",
+    "typescript": "^4.9.3"
   },
   "scripts": {
     "build": "rollup -c",
