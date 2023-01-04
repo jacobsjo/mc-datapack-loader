@@ -12,6 +12,7 @@ interface MyFile extends File{
 export class FileListDatapack implements Datapack{
     private baseDirectoryName: string
     private directoryName: string
+    private is_anonymous: boolean
 
     private files: MyFile[]
 
@@ -21,30 +22,45 @@ export class FileListDatapack implements Datapack{
     ){
         this.files = files.map(f => <MyFile>f)
         this.baseDirectoryName = this.files[0].webkitRelativePath.split("/")[0]
-        this.directoryName = this.baseDirectoryName + "/data"
+
+        this.is_anonymous = this.baseDirectoryName === "data"
+
+        this.directoryName = this.baseDirectoryName + (this.is_anonymous ? "" : "/data")
     }
 
     async getImage(): Promise<string> {
-        const filename = this.baseDirectoryName + "/pack.png"
-        const file = this.files.find(file => file.webkitRelativePath === filename)
-        if (file){
-            return URL.createObjectURL(file)
-        } else {
+        if (this.is_anonymous){
             return UNKOWN_PACK
+        } else {
+            const filename = this.baseDirectoryName + "/pack.png"
+            const file = this.files.find(file => file.webkitRelativePath === filename)
+            if (file){
+                return URL.createObjectURL(file)
+            } else {
+                return UNKOWN_PACK
+            }
         }
     }
 
     async getName(): Promise<string> {
-        return this.baseDirectoryName === "" ? "Datapack loaded from folder" : this.baseDirectoryName
+        if (this.is_anonymous) {
+            return "Imported data folder"
+        } else {
+            return this.baseDirectoryName === "" ? "Datapack loaded from folder" : this.baseDirectoryName
+        }
     }
 
     async getMcmeta(): Promise<unknown> {
-        const filename = this.baseDirectoryName + "/pack.mcmeta"
-        const file = this.files.find(file => file.webkitRelativePath === filename)
-        if (file){
-            return this.parser(await file.text())
-        } else {
+        if (this.is_anonymous){
             return {}
+        } else {
+            const filename = this.baseDirectoryName + "/pack.mcmeta"
+            const file = this.files.find(file => file.webkitRelativePath === filename)
+            if (file){
+                return this.parser(await file.text())
+            } else {
+                return {}
+            }
         }
     }
 

@@ -10,39 +10,59 @@ interface MyFile extends File{
 }
 
 export class FileSystemDirectoryDatapack implements Datapack{
+    private is_anonymous: boolean
+
     constructor(
         private directory: FileSystemDirectoryHandle,
         private parser: (str: string) => unknown = (str) => JSON.parse(stripJsonComments(str)),
         private stringifier: (value: any) => string = (value) => JSON.stringify(value, null, 2)
-    ){}
+    ){
+        this.is_anonymous = (this.directory.name === "data")
+    }
 
     async getImage(): Promise<string> {
-        try {
-            const fileHandle = this.directory.getFileHandle("pack.png")
-            const file = await (await fileHandle).getFile()
-            return URL.createObjectURL(file)
-        } catch {
+        if (this.is_anonymous){
             return UNKOWN_PACK
+        } else {
+            try {
+                const fileHandle = this.directory.getFileHandle("pack.png")
+                const file = await (await fileHandle).getFile()
+                return URL.createObjectURL(file)
+            } catch {
+                return UNKOWN_PACK
+            }
         }
     }
 
     async getName(): Promise<string> {
-        return this.directory.name
+        if (this.is_anonymous){
+            return "Imported data folder"
+        } else {
+            return this.directory.name
+        }
     }
 
     async getMcmeta(): Promise<unknown> {
-        try {
-            const fileHandle = this.directory.getFileHandle("pack.mcmeta")
-            const file = await (await fileHandle).getFile()
-            return this.parser(await file.text())
-        } catch {
+        if (this.is_anonymous){
             return {}
+        } else {
+            try {
+                const fileHandle = this.directory.getFileHandle("pack.mcmeta")
+                const file = await (await fileHandle).getFile()
+                return this.parser(await file.text())
+            } catch {
+                return {}
+            }
         }
     }
 
 
     private async getDataDirectory(): Promise<FileSystemDirectoryHandle>{
-        return (await this.directory.getDirectoryHandle("data"))
+        if (this.is_anonymous){
+            return this.directory
+        } else {
+            return (await this.directory.getDirectoryHandle("data"))
+        }
     }
 
     async has(type: DataType, id: Identifier): Promise<boolean> {  
