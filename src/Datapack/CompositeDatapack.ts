@@ -58,11 +58,11 @@ export class CompositeDatapack implements Datapack {
                     has_replace = true
                 }
 
-                list += json?.values
+                list.push(json?.values)
             }
             return {
                 replace: has_replace,
-                values: list
+                values: list.flat()
             }
         } else if (type === "") {
             var result = {}
