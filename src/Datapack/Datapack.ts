@@ -1,7 +1,7 @@
 import { Identifier } from "deepslate";
-import { DataType, JsonDataType, NbtDataType } from "../DataType";
+import { DataType } from "../DataType";
 
-export interface Datapack{
+export interface Datapack {
     getImage(): Promise<string>
     getName(): Promise<string>
     getMcmeta(): Promise<unknown>

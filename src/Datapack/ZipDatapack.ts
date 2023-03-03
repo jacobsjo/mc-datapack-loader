@@ -65,7 +65,9 @@ export class ZipDatapack implements Datapack{
     async getIds(type: DataType): Promise<Identifier[]> {
         const fileType = getFileType(type)
         return Object.keys(this.zip.files).flatMap(file => {
-            const match = file.match(`data/([^/]*)/${type}/(.*\.${fileType})`)
+            const match = file.match(type === ""
+                ? `data/([^/]*)/([^/]*\.json)`
+                : `data/([^/]*)/${type}/(.*\.${fileType})`)
             if (match && match.length == 3){
                 return [new Identifier(match[1], match[2].substr(0, match[2].lastIndexOf(".")))]
             } else {

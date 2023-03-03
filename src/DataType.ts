@@ -1,6 +1,7 @@
 
 
 export type JsonDataType =
+    "" |
     "advancements" |
     "dimension" | 
     "dimension_type" | 

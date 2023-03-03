@@ -70,7 +70,9 @@ export class FileListDatapack implements Datapack{
 
     async getIds(type: DataType): Promise<Identifier[]> {
         return this.files.flatMap(file => {
-            const match = file.webkitRelativePath.match(this.directoryName + "/([^/]*)/" + type + "/(.*)")
+            const match = file.webkitRelativePath.match(type === ""
+                ? this.directoryName + "/([^/]*)/([^/]*\.json)"
+                : this.directoryName + "/([^/]*)/" + type + "/(.*)")
             if (match && match.length == 3){
                 return [new Identifier(match[1], match[2].substr(0, match[2].lastIndexOf(".")))]
             } else {

@@ -70,7 +70,7 @@ export class FileSystemDirectoryDatapack implements Datapack{
     }
 
     async getIds(type: DataType): Promise<Identifier[]> {
-        const type_dirs = type.split("/")
+        const type_dirs = type === "" ? [] : type.split("/")
 
         const ids: Identifier[] = []
 
@@ -157,7 +157,7 @@ export class FileSystemDirectoryDatapack implements Datapack{
             var directory = await (await this.getDataDirectory()).getDirectoryHandle(id.namespace, {create: create})
             if (directory === undefined) return undefined
 
-            const dirs = type.split("/")
+            const dirs = type === "" ? [] : type.split("/")
             const name_parts = id.path.split("/")
             const filename = name_parts.pop()
             if (filename === undefined) return undefined
