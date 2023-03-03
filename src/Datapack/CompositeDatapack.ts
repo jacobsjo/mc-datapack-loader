@@ -30,7 +30,11 @@ export class CompositeDatapack implements Datapack {
     }
 
     async getIds(type: DataType): Promise<Identifier[]> {
-        return [... new Set((await Promise.all(this.readers.map(reader => reader.getIds(type)))).flat())]
+        return (await Promise.all(this.readers.map(reader => reader.getIds(type)))).flat().filter((value, index, self) =>
+            index === self.findIndex((t) => (
+                t.equals(value)
+            ))
+        )
     }
 
     async get(type: DataType, id: Identifier): Promise<unknown | ArrayBuffer> {
