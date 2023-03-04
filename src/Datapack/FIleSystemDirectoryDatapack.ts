@@ -74,12 +74,12 @@ export class FileSystemDirectoryDatapack implements Datapack{
 
         const ids: Identifier[] = []
 
-        const addDir = async (namespace: string, path: string, directory: FileSystemDirectoryHandle) => {
+        const addDir = async (namespace: string, path: string, directory: FileSystemDirectoryHandle, allow_recursive: boolean) => {
             for await (const [name, e] of (await directory.entries())){
                 if (e.kind === "file"){
                     ids.push(new Identifier(namespace, path + name.substring(0, name.lastIndexOf("."))))
-                } else {
-                    await addDir(namespace, path + name + "/", e)
+                } else if (allow_recursive){
+                    await addDir(namespace, path + name + "/", e, true)
                 }
             }
         }
@@ -98,7 +98,7 @@ export class FileSystemDirectoryDatapack implements Datapack{
                 }
             }
        
-            await addDir(namespace, "", directory)
+            await addDir(namespace, "", directory, type !== "")
         }
         return ids
     }
