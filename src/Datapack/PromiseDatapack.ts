@@ -7,8 +7,8 @@ import { Datapack } from "./Datapack";
 export class PromiseDatapack implements Datapack{
     constructor(private promise: Promise<Datapack>){}
 
-    async getImage(): Promise<string> {
-        return (await this.promise).getImage()
+    async getImage(base64?: boolean): Promise<string> {
+        return (await this.promise).getImage(base64)
     }
 
     async getName(): Promise<string> {

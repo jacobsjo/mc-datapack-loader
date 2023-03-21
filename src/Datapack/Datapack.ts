@@ -2,7 +2,7 @@ import { Identifier } from "deepslate";
 import { DataType } from "../DataType";
 
 export interface Datapack {
-    getImage(): Promise<string>
+    getImage(base64?: boolean): Promise<string>
     getName(): Promise<string>
     getMcmeta(): Promise<unknown>
 

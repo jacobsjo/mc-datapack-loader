@@ -1,5 +1,6 @@
 import { Identifier } from "deepslate"
 import stripJsonComments from "strip-json-comments"
+import { base64ArrayBuffer } from "../base64ArrayBuffer"
 import { DataType, JsonDataType } from "../DataType"
 import { UNKOWN_PACK } from "../unkown_pack"
 import { getFileType, idToPath } from "../util"
@@ -28,14 +29,18 @@ export class FileListDatapack implements Datapack{
         this.directoryName = this.baseDirectoryName + (this.is_anonymous ? "" : "/data")
     }
 
-    async getImage(): Promise<string> {
+    async getImage(base64?: boolean): Promise<string> {
         if (this.is_anonymous){
             return UNKOWN_PACK
         } else {
             const filename = this.baseDirectoryName + "/pack.png"
             const file = this.files.find(file => file.webkitRelativePath === filename)
             if (file){
-                return URL.createObjectURL(file)
+                if (base64){
+                    return "data:image/png;base64," + base64ArrayBuffer(await file.arrayBuffer())
+                } else {
+                    return URL.createObjectURL(file)
+                }
             } else {
                 return UNKOWN_PACK
             }
