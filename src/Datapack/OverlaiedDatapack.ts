@@ -37,7 +37,7 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
         await this.mainPack.prepareSave()
     }
 
-    save(type: DataType, id: Identifier, data: unknown): Promise<boolean> {
+    save(type: DataType.Path, id: Identifier, data: unknown): Promise<boolean> {
         return this.mainPack.save(type, id, data)
     }
 

@@ -1,6 +1,6 @@
 import { Identifier } from "deepslate"
 import { DatapackList } from "../DatapackList"
-import { DataType, JsonDataType } from "../DataType"
+import { DataType } from "../DataType"
 import { AnonymousDatapack, Datapack } from "./Datapack"
 
 export class CompositeDatapack implements AnonymousDatapack {
@@ -8,12 +8,12 @@ export class CompositeDatapack implements AnonymousDatapack {
         private readers: DatapackList
     ) { }
 
-    async has(type: DataType, id: Identifier): Promise<boolean> {
+    async has(type: DataType.Path, id: Identifier): Promise<boolean> {
         const has = await Promise.all(this.readers.getDatapacks().map(reader => reader.has(type, id)))
         return has.includes(true)
     }
 
-    async getIds(type: DataType): Promise<Identifier[]> {
+    async getIds(type: DataType.Path): Promise<Identifier[]> {
         return (await Promise.all(this.readers.getDatapacks().map(reader => reader.getIds(type)))).flat().filter((value, index, self) =>
             index === self.findIndex((t) => (
                 t.equals(value)
@@ -21,10 +21,11 @@ export class CompositeDatapack implements AnonymousDatapack {
         )
     }
 
-    async get(type: DataType, id: Identifier): Promise<unknown | ArrayBuffer> {
+    async get(type: DataType.Path, id: Identifier): Promise<unknown | ArrayBuffer> {
         const has = await Promise.all(this.readers.getDatapacks().map(reader => reader.has(type, id)))
 
-        if (type.startsWith("tags/")) {
+        const mergingType = DataType.PATH_PROPERTIES[type].merging
+        if (mergingType === "tags") {
             var list: string[] = []
             var has_replace: boolean = false
             for (const i in has) {
@@ -48,7 +49,7 @@ export class CompositeDatapack implements AnonymousDatapack {
                 replace: has_replace,
                 values: list.flat()
             }
-        } else if (type === "") {
+        } else if (mergingType === "assign") {
             var result = {}
             for (const i in has) {
                 if (!has[i])
@@ -75,7 +76,7 @@ export class CompositeDatapack implements AnonymousDatapack {
 
     }
 
-    save(type: DataType, id: Identifier, data: unknown): Promise<boolean> {
+    save(type: DataType.Path, id: Identifier, data: unknown): Promise<boolean> {
         throw new Error("Can't save to Composite Datapack")
     }
 

@@ -12,12 +12,12 @@ import { PromiseDatapack } from "./PromiseDatapack";
 
 
 export interface AnonymousDatapack {
-    has(type: DataType, id: Identifier): Promise<boolean>
-    getIds(type: DataType): Promise<Identifier[]>
-    get(type: DataType, id: Identifier): Promise<unknown | ArrayBuffer>
+    has(type: DataType.Path, id: Identifier): Promise<boolean>
+    getIds(type: DataType.Path): Promise<Identifier[]>
+    get(type: DataType.Path, id: Identifier): Promise<unknown | ArrayBuffer>
 
     canSave(): Promise<boolean>
-    save(type: DataType, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean>
+    save(type: DataType.Path, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean>
     prepareSave(): Promise<void>
 }
 export interface Datapack extends AnonymousDatapack{

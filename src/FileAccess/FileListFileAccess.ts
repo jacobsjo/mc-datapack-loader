@@ -1,9 +1,3 @@
-import { Identifier } from "deepslate"
-import stripJsonComments from "strip-json-comments"
-import { base64ArrayBuffer } from "../base64ArrayBuffer"
-import { DataType, JsonDataType } from "../DataType"
-import { UNKOWN_PACK } from "../unkown_pack"
-import { getFileType, idToPath } from "../util"
 import { FileAccess } from "./FileAccess"
 
 interface MyFile extends File{

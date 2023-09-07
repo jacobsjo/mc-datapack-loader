@@ -16,15 +16,15 @@ export class PromiseDatapack implements Datapack{
         return (await this.promise).getMcmeta()
     }
 
-    async has(type: DataType, id: Identifier): Promise<boolean> {
+    async has(type: DataType.Path, id: Identifier): Promise<boolean> {
         return (await this.promise).has(type, id)
     }
     
-    async getIds(type: DataType): Promise<Identifier[]> {
+    async getIds(type: DataType.Path): Promise<Identifier[]> {
         return (await this.promise).getIds(type)
     }
     
-    async get(type: DataType, id: Identifier): Promise<unknown> {
+    async get(type: DataType.Path, id: Identifier): Promise<unknown> {
         return (await this.promise).get(type, id)
     }
 
@@ -32,7 +32,7 @@ export class PromiseDatapack implements Datapack{
         return (await this.promise).canSave()
     }
 
-    async save(type: DataType, id: Identifier, data: unknown): Promise<boolean> {
+    async save(type: DataType.Path, id: Identifier, data: unknown): Promise<boolean> {
         return (await this.promise).save(type, id, data)
     }
 
