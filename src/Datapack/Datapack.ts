@@ -21,7 +21,6 @@ export interface AnonymousDatapack {
 }
 export interface Datapack extends AnonymousDatapack{
     getImage(): Promise<string>
-    getName(): Promise<string>
     getMcmeta(): Promise<PackMcmeta | undefined>
 }
 

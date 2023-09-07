@@ -53,10 +53,6 @@ export class BasicDatapack implements Datapack{
         }
     }
 
-    async getName(): Promise<string> {
-        return "NOT IMPLEMENTED"
-    }
-
     async getMcmeta(): Promise<PackMcmeta | undefined> {
         const text = await this.fileAccess.readFile("path.mcmeta", "string")
         if (text === undefined) return undefined

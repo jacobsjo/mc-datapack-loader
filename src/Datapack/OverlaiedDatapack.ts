@@ -25,10 +25,6 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
         return this.mainPack.getImage()
     }
 
-    getName(): Promise<string> {
-        return this.mainPack.getName()
-    }
-
     getMcmeta(): Promise<PackMcmeta | undefined> {
         return this.mainPack.getMcmeta()
     }
