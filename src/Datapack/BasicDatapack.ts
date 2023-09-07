@@ -54,7 +54,7 @@ export class BasicDatapack implements Datapack{
     }
 
     async getMcmeta(): Promise<PackMcmeta | undefined> {
-        const text = await this.fileAccess.readFile("path.mcmeta", "string")
+        const text = await this.fileAccess.readFile("pack.mcmeta", "string")
         if (text === undefined) return undefined
         return this.jsonParser(text) as PackMcmeta
     }
@@ -65,8 +65,8 @@ export class BasicDatapack implements Datapack{
 
     async getIds(type: DataType): Promise<Identifier[]> {
         return (await Promise.all(
-            (await (await this.fileAccess).getSubfolders(this.baseFolder))
-                .map(async namespace => (await (await this.fileAccess).getAllFiles(`${this.baseFolder}${namespace}/${type}/`))
+            (await this.fileAccess.getSubfolders(this.baseFolder))
+                .map(async namespace => (await this.fileAccess.getAllFiles(`${this.baseFolder}${namespace}/${type}`))
                     .map(file => new Identifier(namespace, file.substring(0, file.lastIndexOf("."))))))
             ).flat()
     }
@@ -84,10 +84,14 @@ export class BasicDatapack implements Datapack{
     }
 
     protected getPath(type: DataType, id: Identifier){
-        return `${this.baseFolder}${id.namespace}/${type}/${id.path}.${getFileType(type)}`
+        if (type===""){
+            return `${this.baseFolder}${id.namespace}/${id.path}.${getFileType(type)}`
+        } else {
+            return `${this.baseFolder}${id.namespace}/${type}/${id.path}.${getFileType(type)}`
+        }
     }
 
-    canSave(): boolean {
+    async canSave(): Promise<boolean> {
         return this.fileAccess.writeFile !== undefined
     }
 

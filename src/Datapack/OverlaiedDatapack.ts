@@ -29,7 +29,7 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
         return this.mainPack.getMcmeta()
     }
 
-    canSave(): boolean {
+    async canSave(): Promise<boolean> {
         return this.mainPack.canSave()
     }
 

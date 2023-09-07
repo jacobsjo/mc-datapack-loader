@@ -67,7 +67,7 @@ export class CompositeDatapack implements AnonymousDatapack {
         }
     }
 
-    canSave(): boolean {
+    async canSave(): Promise<boolean> {
         return false
     }
 

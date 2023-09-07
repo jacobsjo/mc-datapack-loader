@@ -8,6 +8,7 @@ import { ZipFileAccess } from "../FileAccess/ZipFileAccess";
 import { PackMcmeta } from "../PackMcmeta";
 import { BasicDatapack } from "./BasicDatapack";
 import { CompositeDatapack } from "./CompositeDatapack";
+import { PromiseDatapack } from "./PromiseDatapack";
 
 
 export interface AnonymousDatapack {
@@ -15,7 +16,7 @@ export interface AnonymousDatapack {
     getIds(type: DataType): Promise<Identifier[]>
     get(type: DataType, id: Identifier): Promise<unknown | ArrayBuffer>
 
-    canSave(): boolean
+    canSave(): Promise<boolean>
     save(type: DataType, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean>
     prepareSave(): Promise<void>
 }
@@ -25,23 +26,23 @@ export interface Datapack extends AnonymousDatapack{
 }
 
 export namespace Datapack{
-    function fromFileAccess(access: FileAccess): Promise<AnonymousDatapack | Datapack>{
-        return new BasicDatapack(access).constructOverlay()
+    function fromFileAccess(access: FileAccess | Promise<FileAccess>): Datapack{
+        return new PromiseDatapack(new Promise(async (resolve) => resolve(new BasicDatapack(await access).constructOverlay())))
     }
 
-    export function fromFileList(files: File[]): Promise<AnonymousDatapack | Datapack>{
+    export function fromFileList(files: File[]): Datapack{
         return fromFileAccess(new FileListFileAccess(files))
     }
 
-    export async function fromZipFile(file: File): Promise<AnonymousDatapack |Datapack>{
-        return await fromFileAccess(await ZipFileAccess.fromFile(file))
+    export function fromZipFile(file: File): Datapack{
+        return fromFileAccess(ZipFileAccess.fromFile(file))
     }
 
-    export async function fromZipUrl(url: string): Promise<AnonymousDatapack | Datapack>{
-        return await fromFileAccess(await ZipFileAccess.fromUrl(url))
+    export function fromZipUrl(url: string): Datapack{
+        return fromFileAccess(ZipFileAccess.fromUrl(url))
     }
 
-    export function fromFileSystemDirectoryHandle(handle: FileSystemDirectoryHandle): Promise<AnonymousDatapack | Datapack>{
+    export function fromFileSystemDirectoryHandle(handle: FileSystemDirectoryHandle): Datapack{
         return fromFileAccess(new FileSystemDirectoryFileAccess(handle))
     }
 

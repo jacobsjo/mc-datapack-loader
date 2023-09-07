@@ -1,6 +1,6 @@
 {
   "name": "mc-datapack-loader",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "Package to handle the loading of Minecraft Datapacks from different sources",
   "main": "dist/mc-datapack-loader.cjs.js",
   "module": "dist/mc-datapack-loader.esm.js",
