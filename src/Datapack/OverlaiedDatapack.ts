@@ -1,4 +1,7 @@
-import { PackMcmeta } from "../packMcmeta";
+import { Identifier } from "deepslate";
+import { DatapackList } from "../DatapackList";
+import { DataType } from "../DataType";
+import { PackMcmeta } from "../PackMcmeta";
 import { CompositeDatapack } from "./CompositeDatapack";
 import { AnonymousDatapack, Datapack } from "./Datapack";
 
@@ -11,7 +14,11 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
         private mainPack: Datapack,
         overlays: AnonymousDatapack[] = []
     ) { 
-        super([mainPack, ...overlays])
+        super(new class implements DatapackList {
+            getDatapacks(): AnonymousDatapack[] {
+                return [mainPack, ...overlays]
+            }
+        })
     }
 
     getImage(): Promise<string> {
@@ -25,4 +32,17 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
     getMcmeta(): Promise<PackMcmeta | undefined> {
         return this.mainPack.getMcmeta()
     }
+
+    canSave(): boolean {
+        return this.mainPack.canSave()
+    }
+
+    async prepareSave(): Promise<void> {
+        await this.mainPack.prepareSave()
+    }
+
+    save(type: DataType, id: Identifier, data: unknown): Promise<boolean> {
+        return this.mainPack.save(type, id, data)
+    }
+
 }

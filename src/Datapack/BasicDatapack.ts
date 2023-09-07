@@ -6,7 +6,7 @@ import stripJsonComments from "strip-json-comments"
 import { UNKOWN_PACK } from "../unkown_pack"
 import { base64ArrayBuffer } from "../base64ArrayBuffer"
 import { getFileType } from "../util";
-import { PackMcmeta } from "../packMcmeta";
+import { PackMcmeta } from "../PackMcmeta";
 import { CompositeDatapack } from "./CompositeDatapack";
 import { SubFolderFileAccess } from "../FileAccess/SubFolderFileAccess";
 import { OverlaiedDatapack } from "./OverlaiedDatapack";
@@ -15,7 +15,7 @@ export class BasicDatapack implements Datapack{
     private baseFolder: string
 
     constructor(
-        private fileAccess: Promise<FileAccess>,
+        private fileAccess: FileAccess,
         baseFolder: string = "data/",
         private jsonParser: (str: string) => unknown = (str) => JSON.parse(stripJsonComments(str)),
         private jsonStringifier: (value: any) => string = (value) => JSON.stringify(value, null, 2)
@@ -36,9 +36,7 @@ export class BasicDatapack implements Datapack{
         return new OverlaiedDatapack(
             this,
             Mcmeta.overlays.entries.map(
-                e => new BasicDatapack(new Promise(
-                    async resolve => resolve(new SubFolderFileAccess(await this.fileAccess, `overlays/${e.directory}`))
-                ))
+                e => new BasicDatapack(new SubFolderFileAccess(this.fileAccess, e.directory))
             )
         )
     }
@@ -60,13 +58,13 @@ export class BasicDatapack implements Datapack{
     }
 
     async getMcmeta(): Promise<PackMcmeta | undefined> {
-        const text = await (await this.fileAccess).readFile("path.mcmeta", "string")
+        const text = await this.fileAccess.readFile("path.mcmeta", "string")
         if (text === undefined) return undefined
         return this.jsonParser(text) as PackMcmeta
     }
 
     async has(type: DataType, id: Identifier): Promise<boolean> {
-        return await (await this.fileAccess).has(this.getPath(type, id))
+        return await this.fileAccess.has(this.getPath(type, id))
     }
 
     async getIds(type: DataType): Promise<Identifier[]> {
@@ -93,16 +91,21 @@ export class BasicDatapack implements Datapack{
         return `${this.baseFolder}${id.namespace}/${type}/${id.path}.${getFileType(type)}`
     }
 
-
-    async prepareSave?(): Promise<void> {
-        return await (await this.fileAccess).prepareWrite?.()
+    canSave(): boolean {
+        return this.fileAccess.writeFile !== undefined
     }
 
-    async save?(type: DataType, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean> {
+    async prepareSave(): Promise<void> {
+        return this.fileAccess.prepareWrite?.()
+    }
+
+    async save(type: DataType, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean> {
+        if (!this.canSave)
+            throw new Error("Can't write to readonly Datapack")
         const fileType = getFileType(type)
         const path = this.getPath(type, id)
         const writeData = fileType === "json" ? this.jsonStringifier(data) : (data as ArrayBuffer)
-        return await (await this.fileAccess).writeFile?.(path, writeData) ?? false
+        return await this.fileAccess.writeFile?.(path, writeData) ?? false
     }
 
 

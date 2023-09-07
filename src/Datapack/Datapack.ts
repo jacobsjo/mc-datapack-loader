@@ -1,11 +1,13 @@
 import { Identifier } from "deepslate";
+import { DatapackList } from "../DatapackList";
 import { DataType } from "../DataType";
 import { FileAccess } from "../FileAccess/FileAccess";
 import { FileListFileAccess } from "../FileAccess/FileListFileAccess";
 import { FileSystemDirectoryFileAccess } from "../FileAccess/FileSystemDirectoryFileAccess";
 import { ZipFileAccess } from "../FileAccess/ZipFileAccess";
-import { PackMcmeta } from "../packMcmeta";
+import { PackMcmeta } from "../PackMcmeta";
 import { BasicDatapack } from "./BasicDatapack";
+import { CompositeDatapack } from "./CompositeDatapack";
 
 
 export interface AnonymousDatapack {
@@ -13,8 +15,9 @@ export interface AnonymousDatapack {
     getIds(type: DataType): Promise<Identifier[]>
     get(type: DataType, id: Identifier): Promise<unknown | ArrayBuffer>
 
-    save?(type: DataType, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean>
-    prepareSave?(): Promise<void>
+    canSave(): boolean
+    save(type: DataType, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean>
+    prepareSave(): Promise<void>
 }
 export interface Datapack extends AnonymousDatapack{
     getImage(): Promise<string>
@@ -23,23 +26,27 @@ export interface Datapack extends AnonymousDatapack{
 }
 
 export namespace Datapack{
+    function fromFileAccess(access: FileAccess): Promise<AnonymousDatapack | Datapack>{
+        return new BasicDatapack(access).constructOverlay()
+    }
+
     export function fromFileList(files: File[]): Promise<AnonymousDatapack | Datapack>{
-        return fromFileAccess(Promise.resolve(new FileListFileAccess(files)))
+        return fromFileAccess(new FileListFileAccess(files))
     }
 
-    export function fromZipFile(file: File): Promise<AnonymousDatapack |Datapack>{
-        return fromFileAccess(ZipFileAccess.fromFile(file))
+    export async function fromZipFile(file: File): Promise<AnonymousDatapack |Datapack>{
+        return await fromFileAccess(await ZipFileAccess.fromFile(file))
     }
 
-    export function fromZipUrl(url: string): Promise<AnonymousDatapack | Datapack>{
-        return fromFileAccess(ZipFileAccess.fromUrl(url))
+    export async function fromZipUrl(url: string): Promise<AnonymousDatapack | Datapack>{
+        return await fromFileAccess(await ZipFileAccess.fromUrl(url))
     }
 
     export function fromFileSystemDirectoryHandle(handle: FileSystemDirectoryHandle): Promise<AnonymousDatapack | Datapack>{
-        return fromFileAccess(Promise.resolve(new FileSystemDirectoryFileAccess(handle)))
+        return fromFileAccess(new FileSystemDirectoryFileAccess(handle))
     }
 
-    function fromFileAccess(access: Promise<FileAccess>): Promise<AnonymousDatapack | Datapack>{
-        return new BasicDatapack(access).constructOverlay()
+    export function compose(datapacks: DatapackList): AnonymousDatapack{
+        return new CompositeDatapack(datapacks)
     }
 }
