@@ -6,14 +6,41 @@ import stripJsonComments from "strip-json-comments"
 import { UNKOWN_PACK } from "../unkown_pack"
 import { base64ArrayBuffer } from "../base64ArrayBuffer"
 import { getFileType } from "../util";
+import { PackMcmeta } from "../packMcmeta";
+import { CompositeDatapack } from "./CompositeDatapack";
+import { SubFolderFileAccess } from "../FileAccess/SubFolderFileAccess";
+import { OverlaiedDatapack } from "./OverlaiedDatapack";
 
 export class BasicDatapack implements Datapack{
+    private baseFolder: string
+
     constructor(
         private fileAccess: Promise<FileAccess>,
+        baseFolder: string = "data/",
         private jsonParser: (str: string) => unknown = (str) => JSON.parse(stripJsonComments(str)),
         private jsonStringifier: (value: any) => string = (value) => JSON.stringify(value, null, 2)
     ){
+        this.baseFolder = baseFolder
+        if (!this.baseFolder.endsWith("/")){
+            this.baseFolder += "/"
+        }
+    }
 
+    async constructOverlay(): Promise<Datapack> {
+        const Mcmeta = await this.getMcmeta()
+        if (Mcmeta === undefined) return this
+        if (Mcmeta.overlays === undefined) return this
+        if (Mcmeta.overlays.entries.length === 0) return this
+
+
+        return new OverlaiedDatapack(
+            this,
+            Mcmeta.overlays.entries.map(
+                e => new BasicDatapack(new Promise(
+                    async resolve => resolve(new SubFolderFileAccess(await this.fileAccess, `overlays/${e.directory}`))
+                ))
+            )
+        )
     }
 
     async getImage(): Promise<string> {
@@ -32,10 +59,10 @@ export class BasicDatapack implements Datapack{
         return "NOT IMPLEMENTED"
     }
 
-    async getMcmeta(): Promise<unknown> {
+    async getMcmeta(): Promise<PackMcmeta | undefined> {
         const text = await (await this.fileAccess).readFile("path.mcmeta", "string")
         if (text === undefined) return undefined
-        return this.jsonParser(text)
+        return this.jsonParser(text) as PackMcmeta
     }
 
     async has(type: DataType, id: Identifier): Promise<boolean> {
@@ -44,8 +71,8 @@ export class BasicDatapack implements Datapack{
 
     async getIds(type: DataType): Promise<Identifier[]> {
         return (await Promise.all(
-            (await (await this.fileAccess).getSubfolders("data"))
-                .map(async namespace => (await (await this.fileAccess).getAllFiles(`data/${namespace}/${type}/`))
+            (await (await this.fileAccess).getSubfolders(this.baseFolder))
+                .map(async namespace => (await (await this.fileAccess).getAllFiles(`${this.baseFolder}${namespace}/${type}/`))
                     .map(file => new Identifier(namespace, file.substring(0, file.lastIndexOf("."))))))
             ).flat()
     }
@@ -63,7 +90,7 @@ export class BasicDatapack implements Datapack{
     }
 
     protected getPath(type: DataType, id: Identifier){
-        return `data/${id.namespace}/${type}/${id.path}.${getFileType(type)}`
+        return `${this.baseFolder}${id.namespace}/${type}/${id.path}.${getFileType(type)}`
     }
 
 

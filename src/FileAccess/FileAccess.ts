@@ -7,6 +7,7 @@ export interface FileAccess {
 
     readFile(path: string, type: "string"): Promise<string | undefined>
     readFile(path: string, type: "arraybuffer"): Promise<ArrayBuffer | undefined>
+    readFile(path: string, type: "string" | "arraybuffer"): Promise<string | ArrayBuffer | undefined>
 
     writeFile?(path: string, data: string | ArrayBuffer): Promise<boolean>
     prepareWrite?(): Promise<void>
