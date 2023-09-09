@@ -8,6 +8,7 @@ import { ZipFileAccess } from "../FileAccess/ZipFileAccess";
 import { PackMcmeta } from "../PackMcmeta";
 import { BasicDatapack } from "./BasicDatapack";
 import { CompositeDatapack } from "./CompositeDatapack";
+import { OverlaiedDatapack } from "./OverlaiedDatapack";
 import { PromiseDatapack } from "./PromiseDatapack";
 
 
@@ -23,27 +24,33 @@ export interface AnonymousDatapack {
 export interface Datapack extends AnonymousDatapack{
     getImage(): Promise<string>
     getMcmeta(): Promise<PackMcmeta | undefined>
+
+    setPackVersion(version: number): Promise<void>
 }
 
 export namespace Datapack{
-    function fromFileAccess(access: FileAccess | Promise<FileAccess>): Datapack{
-        return new PromiseDatapack(new Promise(async (resolve) => resolve(new BasicDatapack(await access).constructOverlay())))
+    function fromFileAccess(access: FileAccess | Promise<FileAccess>, packVersion: number): Datapack{
+        return new PromiseDatapack(new Promise(async (resolve) => resolve(createOverlay(new BasicDatapack(await access), packVersion))))
     }
 
-    export function fromFileList(files: File[]): Datapack{
-        return fromFileAccess(new FileListFileAccess(files))
+    function createOverlay(basePack: BasicDatapack, packVersion: number): OverlaiedDatapack{
+        return new OverlaiedDatapack(basePack,  packVersion)
     }
 
-    export function fromZipFile(file: File): Datapack{
-        return fromFileAccess(ZipFileAccess.fromFile(file))
+    export function fromFileList(files: File[], packVersion: number): Datapack{
+        return fromFileAccess(new FileListFileAccess(files), packVersion)
     }
 
-    export function fromZipUrl(url: string): Datapack{
-        return fromFileAccess(ZipFileAccess.fromUrl(url))
+    export function fromZipFile(file: File, packVersion: number): Datapack{
+        return fromFileAccess(ZipFileAccess.fromFile(file), packVersion)
     }
 
-    export function fromFileSystemDirectoryHandle(handle: FileSystemDirectoryHandle): Datapack{
-        return fromFileAccess(new FileSystemDirectoryFileAccess(handle))
+    export function fromZipUrl(url: string, packVersion: number): Datapack{
+        return fromFileAccess(ZipFileAccess.fromUrl(url), packVersion)
+    }
+
+    export function fromFileSystemDirectoryHandle(handle: FileSystemDirectoryHandle, packVersion: number): Datapack{
+        return fromFileAccess(new FileSystemDirectoryFileAccess(handle), packVersion)
     }
 
     export function compose(datapacks: DatapackList): AnonymousDatapack{

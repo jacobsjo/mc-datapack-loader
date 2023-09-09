@@ -5,16 +5,16 @@ import { AnonymousDatapack, Datapack } from "./Datapack"
 
 export class CompositeDatapack implements AnonymousDatapack {
     constructor(
-        private readers: DatapackList
+        private datapacks: DatapackList = DatapackList.EMPTY
     ) { }
 
     async has(type: DataType.Path, id: Identifier): Promise<boolean> {
-        const has = await Promise.all(this.readers.getDatapacks().map(reader => reader.has(type, id)))
+        const has = await Promise.all((await this.datapacks.getDatapacks()).map(reader => reader.has(type, id)))
         return has.includes(true)
     }
 
     async getIds(type: DataType.Path): Promise<Identifier[]> {
-        return (await Promise.all(this.readers.getDatapacks().map(reader => reader.getIds(type)))).flat().filter((value, index, self) =>
+        return (await Promise.all((await this.datapacks.getDatapacks()).map(reader => reader.getIds(type)))).flat().filter((value, index, self) =>
             index === self.findIndex((t) => (
                 t.equals(value)
             ))
@@ -22,7 +22,9 @@ export class CompositeDatapack implements AnonymousDatapack {
     }
 
     async get(type: DataType.Path, id: Identifier): Promise<unknown | ArrayBuffer> {
-        const has = await Promise.all(this.readers.getDatapacks().map(reader => reader.has(type, id)))
+        const datapacks = await this.datapacks.getDatapacks()
+
+        const has = await Promise.all(datapacks.map(reader => reader.has(type, id)))
 
         const mergingType = DataType.PATH_PROPERTIES[type].merging
         if (mergingType === "tags") {
@@ -32,7 +34,7 @@ export class CompositeDatapack implements AnonymousDatapack {
                 if (!has[i])
                     continue
 
-                const json = (await this.readers.getDatapacks()[i].get(type, id)) as any
+                const json = (await datapacks[i].get(type, id)) as any
                 if (!json) {
                     console.warn(`Error reading ${type} ${id} from datapack ${i}`)
                     continue
@@ -55,7 +57,7 @@ export class CompositeDatapack implements AnonymousDatapack {
                 if (!has[i])
                     continue
 
-                const json = (await this.readers.getDatapacks()[i].get(type, id)) as any
+                const json = (await datapacks[i].get(type, id)) as any
                 Object.assign(result, json)
             }
             return result
@@ -64,7 +66,7 @@ export class CompositeDatapack implements AnonymousDatapack {
             if (hasIndex < 0) {
                 return undefined
             }
-            return this.readers.getDatapacks()[hasIndex].get(type, id)
+            return datapacks[hasIndex].get(type, id)
         }
     }
 

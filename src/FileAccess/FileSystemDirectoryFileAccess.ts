@@ -32,7 +32,7 @@ export class FileSystemDirectoryFileAccess implements FileAccess{
                 if (e.kind === "file"){
                     files.push(name)
                 } else {
-                    files.concat((await processDirectory(e)).map(p => `${name}/${p}`) )
+                    files.push(...(await processDirectory(e)).map(p => `${name}/${p}`) )
                 }
             }
             return files
@@ -42,7 +42,7 @@ export class FileSystemDirectoryFileAccess implements FileAccess{
     }
 
     async has(path: string): Promise<boolean> {
-        return this.getHandle(path) !== undefined
+        return (await this.getHandle(path)) !== undefined
     }
 
     readFile(path: string, type: "string"): Promise<string | undefined>;
@@ -78,7 +78,13 @@ export class FileSystemDirectoryFileAccess implements FileAccess{
     private getHandle(path: string, folder?: false, create?: boolean ): Promise<FileSystemFileHandle | undefined>
     private getHandle(path: string, folder: true, create?: boolean): Promise<FileSystemDirectoryHandle | undefined>
     private async getHandle(path: string, folder: boolean = false, create: boolean = false): Promise<FileSystemHandle | undefined>{
+        //console.log(`getHandle(${path})`)
+
         try{
+            if (path.endsWith("/")){
+                path = path.slice(0, -1)
+            }
+
             const path_parts = path.split("/")
             const filename = path_parts.pop()
 
@@ -90,8 +96,11 @@ export class FileSystemDirectoryFileAccess implements FileAccess{
                 if (directory === undefined) return undefined
             }
 
-            const file = await (directory.getFileHandle(filename, {create: create}))
-            return file
+            if (folder){
+                return await (directory.getDirectoryHandle(filename, {create: create}))
+            } else {
+                return await (directory.getFileHandle(filename, {create: create}))
+            }
         } catch {
             return undefined
         }

@@ -1,7 +1,9 @@
 import { Identifier } from "deepslate";
 import { DatapackList } from "../DatapackList";
 import { DataType } from "../DataType";
+import { SubFolderFileAccess } from "../FileAccess/SubFolderFileAccess";
 import { PackMcmeta } from "../PackMcmeta";
+import { BasicDatapack } from "./BasicDatapack";
 import { CompositeDatapack } from "./CompositeDatapack";
 import { AnonymousDatapack, Datapack } from "./Datapack";
 
@@ -10,15 +12,20 @@ import { AnonymousDatapack, Datapack } from "./Datapack";
 
 export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
 
+    private list: DL
+
     constructor(
-        private mainPack: Datapack,
-        overlays: AnonymousDatapack[] = []
+        private mainPack: BasicDatapack,
+        packVersion: number
     ) { 
-        super(new class implements DatapackList {
-            getDatapacks(): AnonymousDatapack[] {
-                return [mainPack, ...overlays]
-            }
-        })
+        const list = new DL(mainPack, packVersion)
+        super(list)
+
+        this.list = list
+    }
+
+    async setPackVersion(packVersion: number): Promise<void>{
+        this.list.packVersion = packVersion
     }
 
     getImage(): Promise<string> {
@@ -41,4 +48,33 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
         return this.mainPack.save(type, id, data)
     }
 
+
+
+}
+
+class DL implements DatapackList {
+
+    constructor(
+        private mainPack: BasicDatapack,
+        public packVersion: number
+    ) {
+
+    }
+
+    async getDatapacks(): Promise<AnonymousDatapack[]> {
+        const mcMeta = await this.mainPack.getMcmeta()
+        if (this.packVersion <= 15) return [this.mainPack] // no overlays in 1.20.1 and earlier
+        if (mcMeta === undefined) return [this.mainPack]
+        if (mcMeta.overlays === undefined) return [this.mainPack]
+
+        const overlays = mcMeta.overlays.entries
+            .filter(
+                e => PackMcmeta.MatchFormatRange(e.formats, this.packVersion)
+            )
+            .map(
+                e => new BasicDatapack(new SubFolderFileAccess(this.mainPack.fileAccess, e.directory))
+            )
+
+        return [this.mainPack, ...overlays]
+    }
 }

@@ -1,5 +1,13 @@
 import { AnonymousDatapack } from "./main";
 
 export interface DatapackList {
-    getDatapacks(): AnonymousDatapack[]
+    getDatapacks(): Promise<AnonymousDatapack[]>
+}
+
+export namespace DatapackList{
+    export const EMPTY = new class implements DatapackList{
+        async getDatapacks(): Promise<AnonymousDatapack[]> {
+            return []
+        }
+    }
 }

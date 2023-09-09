@@ -13,7 +13,7 @@ export class BasicDatapack implements Datapack{
     private baseFolder: string
 
     constructor(
-        private fileAccess: FileAccess,
+        public readonly fileAccess: FileAccess,
         baseFolder: string = "data/",
         private jsonParser: (str: string) => unknown = (str) => JSON.parse(stripJsonComments(str)),
         private jsonStringifier: (value: any) => string = (value) => JSON.stringify(value, null, 2)
@@ -24,24 +24,13 @@ export class BasicDatapack implements Datapack{
         }
     }
 
-    async constructOverlay(): Promise<Datapack> {
-        const Mcmeta = await this.getMcmeta()
-        if (Mcmeta === undefined) return this
-        if (Mcmeta.overlays === undefined) return this
-        if (Mcmeta.overlays.entries.length === 0) return this
-
-
-        return new OverlaiedDatapack(
-            this,
-            Mcmeta.overlays.entries.map(
-                e => new BasicDatapack(new SubFolderFileAccess(this.fileAccess, e.directory))
-            )
-        )
+    async setPackVersion(version: number): Promise<void> {
+         
     }
 
     async getImage(): Promise<string> {
         try {
-            const arrayBuffer = await (await this.fileAccess).readFile("pack.png", "arraybuffer")
+            const arrayBuffer = await this.fileAccess.readFile("pack.png", "arraybuffer")
             if (arrayBuffer === undefined){
                 return UNKOWN_PACK
             }

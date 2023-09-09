@@ -8,6 +8,10 @@ import { Datapack } from "./Datapack";
 export class PromiseDatapack implements Datapack{
     constructor(private promise: Promise<Datapack>){}
 
+    async setPackVersion(version: number): Promise<void> {
+        (await this.promise).setPackVersion(version)
+    }
+
     async getImage(base64?: boolean): Promise<string> {
         return (await this.promise).getImage()
     }
