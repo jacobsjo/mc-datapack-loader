@@ -55,7 +55,13 @@ export class BasicDatapack implements Datapack{
             (await this.fileAccess.getSubfolders(this.baseFolder))
                 .map(async namespace => (await this.fileAccess.getAllFiles(`${this.baseFolder}${namespace}/${type}`))
                     .filter(file => file.endsWith(`.${DataType.PATH_PROPERTIES[type].fileExtension}`))
-                    .map(file => new Identifier(namespace, file.substring(0, file.lastIndexOf("."))))))
+                    .flatMap(file => {
+                        try {
+                            return new Identifier(namespace, file.substring(0, file.lastIndexOf(".")))
+                        } catch {
+                            return []
+                        }
+                    })))
             ).flat()
     }
 
