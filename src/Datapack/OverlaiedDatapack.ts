@@ -24,6 +24,10 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
         this.list = list
     }
 
+    getFilename(): Promise<string> {
+        return this.mainPack.getFilename()
+    }
+
     async setPackVersion(packVersion: number): Promise<void>{
         this.list.packVersion = packVersion
     }

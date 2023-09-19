@@ -5,8 +5,13 @@ export class ZipFileAccess implements FileAccess{
 
     constructor(
         private zip: jszip,
+        private filename: string
     ){
 
+    }
+
+    getFilename(): string {
+        return this.filename
     }
 
     public static async fromFile(
@@ -14,7 +19,7 @@ export class ZipFileAccess implements FileAccess{
     ){
         const data = await file.arrayBuffer()
         const zip = await jszip.loadAsync(data)
-        return new ZipFileAccess(zip)
+        return new ZipFileAccess(zip, file.name)
     }
 
     public static async fromUrl(
@@ -22,7 +27,7 @@ export class ZipFileAccess implements FileAccess{
     ){
         const data = await (await fetch(url)).arrayBuffer()
         const zip = await jszip.loadAsync(data)
-        return new ZipFileAccess(zip)
+        return new ZipFileAccess(zip, url.split('/').pop() ?? url)
     }
 
     async getAllFiles(path: string): Promise<string[]> {

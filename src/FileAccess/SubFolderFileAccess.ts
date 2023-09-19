@@ -14,6 +14,10 @@ export class SubFolderFileAccess implements FileAccess{
         }
     }
 
+    getFilename(): string {
+        return `[${this.parentAccess.getFilename()} at ${this.parentPath}]`
+    }
+
     getSubfolders(path: string): Promise<string[]> {
         return this.parentAccess.getSubfolders(this.parentPath + path)
     }

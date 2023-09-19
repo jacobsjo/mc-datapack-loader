@@ -24,6 +24,10 @@ export class BasicDatapack implements Datapack{
         }
     }
 
+    async getFilename(): Promise<string> {
+        return this.fileAccess.getFilename()
+    }
+
     async setPackVersion(version: number): Promise<void> {
          
     }
@@ -93,7 +97,7 @@ export class BasicDatapack implements Datapack{
     }
 
     async save(type: DataType.Path, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean> {
-        if (!this.canSave)
+        if (!(await this.canSave()))
             throw new Error("Can't write to readonly Datapack")
         const path = this.getPath(type, id)
         const writeData = DataType.PATH_PROPERTIES[type].fileExtension === "json" ? this.jsonStringifier(data) : (data as ArrayBuffer)

@@ -15,6 +15,10 @@ export class FileListFileAccess implements FileAccess{
         this.parentFolder = this.files[0].webkitRelativePath.split('/')[0]
     }
 
+    getFilename(): string {
+        return this.parentFolder
+    }
+
     async getAllFiles(path: string): Promise<string[]> {
         if (path.length > 0 && !path.endsWith("/")) path = path + "/"
         path = `${this.parentFolder}/${path}`

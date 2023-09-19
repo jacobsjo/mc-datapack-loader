@@ -22,6 +22,7 @@ export interface AnonymousDatapack {
     prepareSave(): Promise<void>
 }
 export interface Datapack extends AnonymousDatapack{
+    getFilename(): Promise<string>
     getImage(): Promise<string>
     getMcmeta(): Promise<PackMcmeta | undefined>
 

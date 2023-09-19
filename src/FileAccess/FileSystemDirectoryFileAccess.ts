@@ -8,6 +8,10 @@ export class FileSystemDirectoryFileAccess implements FileAccess{
 
     }
 
+    getFilename(): string {
+        return this.directory.name
+    }
+
     async getSubfolders(path: string): Promise<string[]> {
         const handle = await this.getHandle(path, true)
         if (handle === undefined) return []

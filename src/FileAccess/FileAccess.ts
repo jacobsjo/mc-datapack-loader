@@ -1,6 +1,8 @@
 
 
 export interface FileAccess {
+    getFilename(): string
+
     getSubfolders(path: string): Promise<string[]>
     getAllFiles(path: string): Promise<string[]>
     has(path: string): Promise<boolean>
