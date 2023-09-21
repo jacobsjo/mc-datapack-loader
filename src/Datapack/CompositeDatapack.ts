@@ -5,7 +5,8 @@ import { AnonymousDatapack, Datapack } from "./Datapack"
 
 export class CompositeDatapack implements AnonymousDatapack {
     constructor(
-        private datapacks: DatapackList = DatapackList.EMPTY
+        private datapacks: DatapackList = DatapackList.EMPTY,
+        private merge: boolean = true
     ) { }
 
     async has(type: DataType.Path, id: Identifier): Promise<boolean> {
@@ -26,7 +27,7 @@ export class CompositeDatapack implements AnonymousDatapack {
 
         const has = await Promise.all(datapacks.map(reader => reader.has(type, id)))
 
-        const mergingType = DataType.PATH_PROPERTIES[type].merging
+        const mergingType = this.merge ? DataType.PATH_PROPERTIES[type].merging : "override"
         if (mergingType === "tags") {
             var list: string[] = []
             var has_replace: boolean = false

@@ -19,7 +19,7 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
         packVersion: number
     ) { 
         const list = new DL(mainPack, packVersion)
-        super(list)
+        super(list, false)
 
         this.list = list
     }
