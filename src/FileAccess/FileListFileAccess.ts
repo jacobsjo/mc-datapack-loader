@@ -1,4 +1,4 @@
-import { FileAccess } from "./FileAccess"
+import { FileAccess, removeBom } from "./FileAccess"
 
 interface MyFile extends File{
     readonly webkitRelativePath: string;
@@ -44,7 +44,7 @@ export class FileListFileAccess implements FileAccess{
         if (type == "arraybuffer"){
             return await file.arrayBuffer()
         } else {
-            return await file.text()
+            return removeBom(await file.text())
         }
     }
 }
