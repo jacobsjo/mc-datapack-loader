@@ -5,23 +5,14 @@ import stripJsonComments from "strip-json-comments"
 import { UNKOWN_PACK } from "../unkown_pack"
 import { base64ArrayBuffer } from "../base64ArrayBuffer"
 import { PackMcmeta } from "../PackMcmeta";
-import { SubFolderFileAccess } from "../FileAccess/SubFolderFileAccess";
-import { OverlaiedDatapack } from "./OverlaiedDatapack";
-import { DataType } from "../DataType";
+import { ResourceLocation } from "../DataType";
 
 export class BasicDatapack implements Datapack{
-    private baseFolder: string
-
     constructor(
         public readonly fileAccess: FileAccess,
-        baseFolder: string = "data/",
         private jsonParser: (str: string) => unknown = (str) => JSON.parse(stripJsonComments(str)),
         private jsonStringifier: (value: any) => string = (value) => JSON.stringify(value, null, 2)
     ){
-        this.baseFolder = baseFolder
-        if (!this.baseFolder.endsWith("/")){
-            this.baseFolder += "/"
-        }
     }
 
     async getFilename(): Promise<string> {
@@ -50,15 +41,15 @@ export class BasicDatapack implements Datapack{
         return this.jsonParser(text) as PackMcmeta
     }
 
-    async has(type: DataType.Path, id: Identifier): Promise<boolean> {
-        return await this.fileAccess.has(this.getPath(type, id))
+    async has(location: ResourceLocation, id: Identifier): Promise<boolean> {
+        return await this.fileAccess.has(this.getPath(location, id))
     }
 
-    async getIds(type: DataType.Path): Promise<Identifier[]> {
+    async getIds(location: ResourceLocation): Promise<Identifier[]> {
         return (await Promise.all(
-            (await this.fileAccess.getSubfolders(this.baseFolder))
-                .map(async namespace => (await this.fileAccess.getAllFiles(`${this.baseFolder}${namespace}/${type}`))
-                    .filter(file => file.endsWith(`.${DataType.PATH_PROPERTIES[type].fileExtension}`))
+            (await this.fileAccess.getSubfolders(`${location.type}/`))
+                .map(async namespace => (await this.fileAccess.getAllFiles(`${location.type}/${namespace}/${location.location}`))
+                    .filter(file => file.endsWith(`.${location.fileExtension}`))
                     .flatMap(file => {
                         try {
                             return new Identifier(namespace, file.substring(0, file.lastIndexOf(".")))
@@ -69,9 +60,9 @@ export class BasicDatapack implements Datapack{
             ).flat()
     }
 
-    async get(type: DataType.Path, id: Identifier): Promise<unknown> {
-        const path = this.getPath(type, id)
-        if (DataType.PATH_PROPERTIES[type].reader === "arraybuffer"){
+    async get(location: ResourceLocation, id: Identifier): Promise<unknown> {
+        const path = this.getPath(location, id)
+        if (location.reader === "arraybuffer"){
             return await this.fileAccess.readFile(path, "arraybuffer")
         } else {
             const text = await (await this.fileAccess).readFile(path, "string")
@@ -80,11 +71,11 @@ export class BasicDatapack implements Datapack{
         }
     }
 
-    protected getPath(type: DataType.Path, id: Identifier){
-        if (type === ""){
-            return `${this.baseFolder}${id.namespace}/${id.path}.${DataType.PATH_PROPERTIES[type].fileExtension}`
+    protected getPath(location: ResourceLocation, id: Identifier){
+        if (location.location === ""){
+            return `${location.type}/${id.namespace}/${id.path}.${location.fileExtension}`
         } else {
-            return `${this.baseFolder}${id.namespace}/${type}/${id.path}.${DataType.PATH_PROPERTIES[type].fileExtension}`
+            return `${location.type}/${id.namespace}/${location.location}/${id.path}.${location.fileExtension}`
         }
     }
 
@@ -96,11 +87,11 @@ export class BasicDatapack implements Datapack{
         return this.fileAccess.prepareWrite?.()
     }
 
-    async save(type: DataType.Path, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean> {
+    async save(location: ResourceLocation, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean> {
         if (!(await this.canSave()))
             throw new Error("Can't write to readonly Datapack")
-        const path = this.getPath(type, id)
-        const writeData = DataType.PATH_PROPERTIES[type].fileExtension === "json" ? this.jsonStringifier(data) : (data as ArrayBuffer)
+        const path = this.getPath(location, id)
+        const writeData = location.fileExtension === "json" ? this.jsonStringifier(data) : (data as ArrayBuffer)
         return await this.fileAccess.writeFile?.(path, writeData) ?? false
     }
 

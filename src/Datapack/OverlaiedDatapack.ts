@@ -1,14 +1,11 @@
 import { Identifier } from "deepslate";
 import { DatapackList } from "../DatapackList";
-import { DataType } from "../DataType";
+import { ResourceLocation } from "../DataType";
 import { SubFolderFileAccess } from "../FileAccess/SubFolderFileAccess";
 import { PackMcmeta } from "../PackMcmeta";
 import { BasicDatapack } from "./BasicDatapack";
 import { CompositeDatapack } from "./CompositeDatapack";
 import { AnonymousDatapack, Datapack } from "./Datapack";
-
-
-
 
 export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
 
@@ -48,7 +45,7 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
         await this.mainPack.prepareSave()
     }
 
-    save(type: DataType.Path, id: Identifier, data: unknown): Promise<boolean> {
+    save(type: ResourceLocation, id: Identifier, data: unknown): Promise<boolean> {
         return this.mainPack.save(type, id, data)
     }
 

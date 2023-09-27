@@ -1,6 +1,6 @@
 import { Identifier } from "deepslate"
 import { DatapackList } from "../DatapackList"
-import { DataType } from "../DataType"
+import { ResourceLocation } from "../DataType"
 import { AnonymousDatapack, Datapack } from "./Datapack"
 
 export class CompositeDatapack implements AnonymousDatapack {
@@ -9,25 +9,25 @@ export class CompositeDatapack implements AnonymousDatapack {
         private merge: boolean = true
     ) { }
 
-    async has(type: DataType.Path, id: Identifier): Promise<boolean> {
-        const has = await Promise.all((await this.datapacks.getDatapacks()).map(reader => reader.has(type, id)))
+    async has(location: ResourceLocation, id: Identifier): Promise<boolean> {
+        const has = await Promise.all((await this.datapacks.getDatapacks()).map(reader => reader.has(location, id)))
         return has.includes(true)
     }
 
-    async getIds(type: DataType.Path): Promise<Identifier[]> {
-        return (await Promise.all((await this.datapacks.getDatapacks()).map(reader => reader.getIds(type)))).flat().filter((value, index, self) =>
+    async getIds(location: ResourceLocation): Promise<Identifier[]> {
+        return (await Promise.all((await this.datapacks.getDatapacks()).map(reader => reader.getIds(location)))).flat().filter((value, index, self) =>
             index === self.findIndex((t) => (
                 t.equals(value)
             ))
         )
     }
 
-    async get(type: DataType.Path, id: Identifier): Promise<unknown | ArrayBuffer> {
+    async get(location: ResourceLocation, id: Identifier): Promise<unknown | ArrayBuffer> {
         const datapacks = await this.datapacks.getDatapacks()
 
-        const has = await Promise.all(datapacks.map(reader => reader.has(type, id)))
+        const has = await Promise.all(datapacks.map(reader => reader.has(location, id)))
 
-        const mergingType = this.merge ? DataType.PATH_PROPERTIES[type].merging : "override"
+        const mergingType = this.merge ? location.merging : "override"
         if (mergingType === "tags") {
             var list: string[] = []
             var has_replace: boolean = false
@@ -35,9 +35,9 @@ export class CompositeDatapack implements AnonymousDatapack {
                 if (!has[i])
                     continue
 
-                const json = (await datapacks[i].get(type, id)) as any
+                const json = (await datapacks[i].get(location, id)) as any
                 if (!json) {
-                    console.warn(`Error reading ${type} ${id} from datapack ${i}`)
+                    console.warn(`Error reading ${location} ${id} from datapack ${i}`)
                     continue
                 }
 
@@ -58,7 +58,7 @@ export class CompositeDatapack implements AnonymousDatapack {
                 if (!has[i])
                     continue
 
-                const json = (await datapacks[i].get(type, id)) as any
+                const json = (await datapacks[i].get(location, id)) as any
                 Object.assign(result, json)
             }
             return result
@@ -67,7 +67,7 @@ export class CompositeDatapack implements AnonymousDatapack {
             if (hasIndex < 0) {
                 return undefined
             }
-            return datapacks[hasIndex].get(type, id)
+            return datapacks[hasIndex].get(location, id)
         }
     }
 
@@ -79,7 +79,7 @@ export class CompositeDatapack implements AnonymousDatapack {
 
     }
 
-    save(type: DataType.Path, id: Identifier, data: unknown): Promise<boolean> {
+    save(location: ResourceLocation, id: Identifier, data: unknown): Promise<boolean> {
         throw new Error("Can't save to Composite Datapack")
     }
 

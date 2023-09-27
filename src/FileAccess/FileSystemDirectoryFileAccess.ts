@@ -1,4 +1,4 @@
-import { FileAccess } from "./FileAccess";
+import { FileAccess, removeBom } from "./FileAccess";
 
 export class FileSystemDirectoryFileAccess implements FileAccess{
 
@@ -58,7 +58,7 @@ export class FileSystemDirectoryFileAccess implements FileAccess{
         if (type == "arraybuffer"){
             return (await file).arrayBuffer()
         } else {
-            return (await file).text()
+            return removeBom(await (await file).text())
         }
     }
 

@@ -14,3 +14,10 @@ export interface FileAccess {
     writeFile?(path: string, data: string | ArrayBuffer): Promise<boolean>
     prepareWrite?(): Promise<void>
 }
+
+export function removeBom(res: string): string {
+    if (res.charCodeAt(0) === 0xFEFF) {
+        res = res.substring(1);
+    }
+    return res
+}

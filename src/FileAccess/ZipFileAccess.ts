@@ -1,4 +1,4 @@
-import { FileAccess } from "./FileAccess";
+import { FileAccess, removeBom } from "./FileAccess";
 import jszip, { file } from "jszip";
 
 export class ZipFileAccess implements FileAccess{
@@ -46,6 +46,10 @@ export class ZipFileAccess implements FileAccess{
     readFile(path: string, type: "string"): Promise<string | undefined>;
     readFile(path: string, type: "arraybuffer"): Promise<ArrayBuffer | undefined>;
     async readFile(path: string, type: "arraybuffer" | "string"): Promise<string | ArrayBuffer | undefined> {
-        return this.zip.file(path)?.async(type)
+        const res = await this.zip.file(path)?.async(type)
+        if (type === "string"){
+            return removeBom(res as string)
+        }
+        return res
     }
 }

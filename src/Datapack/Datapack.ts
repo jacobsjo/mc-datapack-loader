@@ -1,6 +1,6 @@
 import { Identifier } from "deepslate";
 import { DatapackList } from "../DatapackList";
-import { DataType } from "../DataType";
+import { ResourceLocation } from "../DataType";
 import { FileAccess } from "../FileAccess/FileAccess";
 import { FileListFileAccess } from "../FileAccess/FileListFileAccess";
 import { FileSystemDirectoryFileAccess } from "../FileAccess/FileSystemDirectoryFileAccess";
@@ -13,12 +13,12 @@ import { PromiseDatapack } from "./PromiseDatapack";
 
 
 export interface AnonymousDatapack {
-    has(type: DataType.Path, id: Identifier): Promise<boolean>
-    getIds(type: DataType.Path): Promise<Identifier[]>
-    get(type: DataType.Path, id: Identifier): Promise<unknown | ArrayBuffer>
+    has(location: ResourceLocation, id: Identifier): Promise<boolean>
+    getIds(location: ResourceLocation): Promise<Identifier[]>
+    get(location: ResourceLocation, id: Identifier): Promise<unknown | ArrayBuffer>
 
     canSave(): Promise<boolean>
-    save(type: DataType.Path, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean>
+    save(location: ResourceLocation, id: Identifier, data: unknown | ArrayBuffer): Promise<boolean>
     prepareSave(): Promise<void>
 }
 export interface Datapack extends AnonymousDatapack{
