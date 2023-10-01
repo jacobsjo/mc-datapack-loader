@@ -71,6 +71,7 @@ export class FileSystemDirectoryFileAccess implements FileAccess{
         try {
             writable = await (await this.getHandle(path, false, true))?.createWritable()
             await writable?.write(data)
+            await writable?.close()
         } catch (e) {
             writable?.abort()
             return false
