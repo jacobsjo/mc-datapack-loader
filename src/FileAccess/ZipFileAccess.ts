@@ -47,7 +47,7 @@ export class ZipFileAccess implements FileAccess{
     readFile(path: string, type: "arraybuffer"): Promise<ArrayBuffer | undefined>;
     async readFile(path: string, type: "arraybuffer" | "string"): Promise<string | ArrayBuffer | undefined> {
         const res = await this.zip.file(path)?.async(type)
-        if (type === "string"){
+        if (type === "string" && res){
             return removeBom(res as string)
         }
         return res
