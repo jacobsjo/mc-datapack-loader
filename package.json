@@ -1,6 +1,6 @@
 {
   "name": "mc-datapack-loader",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Package to handle the loading of Minecraft Datapacks from different sources",
   "main": "dist/mc-datapack-loader.cjs.js",
   "module": "dist/mc-datapack-loader.esm.js",
@@ -14,7 +14,7 @@
   "homepage": "https://github.com/jacobsjo/mc-datapack-loader",
   "dependencies": {
     "@fireflysemantics/join": "^1.0.14",
-    "deepslate": "^0.13.2",
+    "deepslate": "^0.22.4",
     "jszip": "^3.10.1",
     "strip-json-comments": "^5.0.0"
   },
