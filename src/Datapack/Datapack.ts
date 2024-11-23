@@ -31,7 +31,11 @@ export interface Datapack extends AnonymousDatapack{
 
 export namespace Datapack{
     function fromFileAccess(access: FileAccess | Promise<FileAccess>, packVersion: number): Datapack{
-        return new PromiseDatapack(new Promise(async (resolve) => resolve(createOverlay(new BasicDatapack(await access), packVersion))))
+        if (access instanceof Promise){
+            return new PromiseDatapack(access.then((a => createOverlay(new BasicDatapack(a), packVersion))))
+        } else {
+            return (createOverlay(new BasicDatapack(access), packVersion))
+        }
     }
 
     function createOverlay(basePack: BasicDatapack, packVersion: number): OverlaiedDatapack{
@@ -46,8 +50,12 @@ export namespace Datapack{
         return fromFileAccess(ZipFileAccess.fromFile(file), packVersion)
     }
 
-    export function fromZipUrl(url: string, packVersion: number): Datapack{
-        return fromFileAccess(ZipFileAccess.fromUrl(url), packVersion)
+    export function fromZipUrl(url: string | Promise<string>, packVersion: number): Datapack{
+        if (url instanceof Promise){
+            return fromFileAccess(url.then(u => ZipFileAccess.fromUrl(u)), packVersion)
+        } else {
+            return fromFileAccess(ZipFileAccess.fromUrl(url), packVersion)
+        }
     }
 
     export function fromFileSystemDirectoryHandle(handle: FileSystemDirectoryHandle, packVersion: number): Datapack{

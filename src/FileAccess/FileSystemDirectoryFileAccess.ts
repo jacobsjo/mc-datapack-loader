@@ -83,8 +83,6 @@ export class FileSystemDirectoryFileAccess implements FileAccess{
     private getHandle(path: string, folder?: false, create?: boolean ): Promise<FileSystemFileHandle | undefined>
     private getHandle(path: string, folder: true, create?: boolean): Promise<FileSystemDirectoryHandle | undefined>
     private async getHandle(path: string, folder: boolean = false, create: boolean = false): Promise<FileSystemHandle | undefined>{
-        //console.log(`getHandle(${path})`)
-
         try{
             if (path.endsWith("/")){
                 path = path.slice(0, -1)
