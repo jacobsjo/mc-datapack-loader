@@ -55,15 +55,16 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
 
 class DL implements DatapackList {
 
+    public mcMeta: Promise<PackMcmeta | undefined>
     constructor(
         private mainPack: BasicDatapack,
         public packVersion: number
     ) {
-
+        this.mcMeta = this.mainPack.getMcmeta()
     }
 
     async getDatapacks(): Promise<AnonymousDatapack[]> {
-        const mcMeta = await this.mainPack.getMcmeta()
+        const mcMeta = await this.mcMeta
         if (this.packVersion <= 15) return [this.mainPack] // no overlays in 1.20.1 and earlier
         if (mcMeta === undefined) return [this.mainPack]
         if (mcMeta.overlays === undefined) return [this.mainPack]
