@@ -10,6 +10,7 @@ import { BasicDatapack } from "./BasicDatapack";
 import { CompositeDatapack } from "./CompositeDatapack";
 import { OverlaiedDatapack } from "./OverlaiedDatapack";
 import { PromiseDatapack } from "./PromiseDatapack";
+import { PackFormat } from "../PackFormat";
 
 
 export interface AnonymousDatapack {
@@ -26,11 +27,11 @@ export interface Datapack extends AnonymousDatapack{
     getImage(): Promise<string>
     getMcmeta(): Promise<PackMcmeta | undefined>
 
-    setPackVersion(version: number): Promise<void>
+    setPackVersion(version: number | PackFormat): Promise<void>
 }
 
 export namespace Datapack{
-    function fromFileAccess(access: FileAccess | Promise<FileAccess>, packVersion: number): Datapack{
+    function fromFileAccess(access: FileAccess | Promise<FileAccess>, packVersion: number | PackFormat): Datapack{
         if (access instanceof Promise){
             return new PromiseDatapack(access.then((a => createOverlay(new BasicDatapack(a), packVersion))))
         } else {
@@ -38,19 +39,23 @@ export namespace Datapack{
         }
     }
 
-    function createOverlay(basePack: BasicDatapack, packVersion: number): OverlaiedDatapack{
-        return new OverlaiedDatapack(basePack,  packVersion)
+    function createOverlay(basePack: BasicDatapack, packVersion: number | PackFormat): OverlaiedDatapack{
+        if (typeof packVersion === 'number'){
+            return new OverlaiedDatapack(basePack, new PackFormat(packVersion))
+        } else {
+            return new OverlaiedDatapack(basePack, packVersion)
+        }
     }
 
-    export function fromFileList(files: File[], packVersion: number): Datapack{
+    export function fromFileList(files: File[], packVersion: number | PackFormat): Datapack{
         return fromFileAccess(new FileListFileAccess(files), packVersion)
     }
 
-    export function fromZipFile(file: File, packVersion: number): Datapack{
+    export function fromZipFile(file: File, packVersion: number | PackFormat): Datapack{
         return fromFileAccess(ZipFileAccess.fromFile(file), packVersion)
     }
 
-    export function fromZipUrl(url: string | Promise<string>, packVersion: number): Datapack{
+    export function fromZipUrl(url: string | Promise<string>, packVersion: number | PackFormat): Datapack{
         if (url instanceof Promise){
             return fromFileAccess(url.then(u => ZipFileAccess.fromUrl(u)), packVersion)
         } else {
@@ -58,7 +63,7 @@ export namespace Datapack{
         }
     }
 
-    export function fromFileSystemDirectoryHandle(handle: FileSystemDirectoryHandle, packVersion: number): Datapack{
+    export function fromFileSystemDirectoryHandle(handle: FileSystemDirectoryHandle, packVersion: number | PackFormat): Datapack{
         return fromFileAccess(new FileSystemDirectoryFileAccess(handle), packVersion)
     }
 

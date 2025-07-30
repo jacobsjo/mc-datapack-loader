@@ -3,6 +3,7 @@ import { ResourceLocation } from "../DataType";
 import { PackMcmeta } from "../PackMcmeta";
 import { Datapack } from "./Datapack";
 import { UNKOWN_PACK } from "../unkown_pack";
+import { PackFormat } from "../PackFormat";
 
 
 
@@ -13,7 +14,7 @@ export class PromiseDatapack implements Datapack{
         return this.promise.then(datapack => datapack.getFilename()).catch((reason: Error) => reason.message)
     }
 
-    async setPackVersion(version: number): Promise<void> {
+    async setPackVersion(version: number | PackFormat): Promise<void> {
         this.promise.then(datapack => datapack.setPackVersion(version)).catch()
     }
 
@@ -23,12 +24,7 @@ export class PromiseDatapack implements Datapack{
 
     async getMcmeta(): Promise<PackMcmeta | undefined> {
         return this.promise.then(datapack => datapack.getMcmeta()).catch((reason: Error) => {
-            return {
-                pack: {
-                    pack_format: -1,
-                    description: reason.message
-                }
-            }
+            return new PackMcmeta(reason.message, {min: new PackFormat(-1), max: new PackFormat(-1)}, [])
         })
     }
 

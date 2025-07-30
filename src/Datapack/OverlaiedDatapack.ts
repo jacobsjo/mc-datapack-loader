@@ -6,6 +6,7 @@ import { PackMcmeta } from "../PackMcmeta";
 import { BasicDatapack } from "./BasicDatapack";
 import { CompositeDatapack } from "./CompositeDatapack";
 import { AnonymousDatapack, Datapack } from "./Datapack";
+import { PackFormat } from "../PackFormat";
 
 export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
 
@@ -13,7 +14,7 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
 
     constructor(
         private mainPack: BasicDatapack,
-        packVersion: number
+        packVersion: PackFormat
     ) { 
         const list = new DL(mainPack, packVersion)
         super(list, false)
@@ -25,8 +26,12 @@ export class OverlaiedDatapack extends CompositeDatapack implements Datapack{
         return this.mainPack.getFilename()
     }
 
-    async setPackVersion(packVersion: number): Promise<void>{
-        this.list.packVersion = packVersion
+    async setPackVersion(packVersion: number | PackFormat): Promise<void>{
+        if (typeof packVersion === 'number'){
+            this.list.packVersion = new PackFormat(packVersion)
+        } else {
+            this.list.packVersion = packVersion
+        }
     }
 
     getImage(): Promise<string> {
@@ -58,18 +63,18 @@ class DL implements DatapackList {
     public mcMeta: Promise<PackMcmeta | undefined>
     constructor(
         private mainPack: BasicDatapack,
-        public packVersion: number
+        public packVersion: PackFormat
     ) {
         this.mcMeta = this.mainPack.getMcmeta()
     }
 
     async getDatapacks(): Promise<AnonymousDatapack[]> {
         const mcMeta = await this.mcMeta
-        if (this.packVersion <= 15) return [this.mainPack] // no overlays in 1.20.1 and earlier
+        if (this.packVersion.compare(new PackFormat(15)) ) return [this.mainPack] // no overlays in 1.20.1 and earlier
         if (mcMeta === undefined) return [this.mainPack]
         if (mcMeta.overlays === undefined) return [this.mainPack]
 
-        const overlays = mcMeta.overlays.entries
+        const overlays = mcMeta.overlays
             .filter(
                 e => PackMcmeta.MatchFormatRange(e.formats, this.packVersion)
             )

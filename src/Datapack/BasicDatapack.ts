@@ -6,6 +6,7 @@ import { UNKOWN_PACK } from "../unkown_pack"
 import { base64ArrayBuffer } from "../base64ArrayBuffer"
 import { PackMcmeta } from "../PackMcmeta";
 import { ResourceLocation } from "../DataType";
+import { PackFormat } from "../PackFormat";
 
 export class BasicDatapack implements Datapack{
     constructor(
@@ -19,7 +20,7 @@ export class BasicDatapack implements Datapack{
         return this.fileAccess.getFilename()
     }
 
-    async setPackVersion(version: number): Promise<void> {
+    async setPackVersion(version: number | PackFormat): Promise<void> {
          
     }
 
@@ -38,7 +39,7 @@ export class BasicDatapack implements Datapack{
     async getMcmeta(): Promise<PackMcmeta | undefined> {
         const text = await this.fileAccess.readFile("pack.mcmeta", "string")
         if (text === undefined) return undefined
-        return this.jsonParser(text) as PackMcmeta
+        return PackMcmeta.fromJson(this.jsonParser(text))
     }
 
     async has(location: ResourceLocation, id: Identifier): Promise<boolean> {
