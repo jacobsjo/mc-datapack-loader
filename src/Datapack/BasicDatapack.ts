@@ -1,4 +1,3 @@
-import { Identifier } from "deepslate";
 import { FileAccess } from "../FileAccess/FileAccess";
 import { Datapack } from "./Datapack";
 import stripJsonComments from "strip-json-comments"
@@ -7,6 +6,7 @@ import { base64ArrayBuffer } from "../base64ArrayBuffer"
 import { PackMcmeta } from "../PackMcmeta";
 import { ResourceLocation } from "../DataType";
 import { PackFormat } from "../PackFormat";
+import { Identifier } from "../Identifier";
 
 export class BasicDatapack implements Datapack{
     constructor(
@@ -66,7 +66,7 @@ export class BasicDatapack implements Datapack{
         if (location.reader === "arraybuffer"){
             return await this.fileAccess.readFile(path, "arraybuffer")
         } else {
-            const text = await (await this.fileAccess).readFile(path, "string")
+            const text = await this.fileAccess.readFile(path, "string")
             if (text === undefined) return undefined
             return this.jsonParser(text)
         }

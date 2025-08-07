@@ -80,6 +80,11 @@ export class PackMcmeta {
         } else if (formats !== undefined) {
             return {min: new PackFormat(formats.min_inclusive, 0), max: new PackFormat(formats.max_inclusive, Number.MAX_SAFE_INTEGER)}
         }
+
+        if ((obj as any).pack_format !== undefined) {
+            return {min: new PackFormat((obj as any).pack_format, 0), max: new PackFormat((obj as any).pack_format, 0)}
+        }
+
         throw new Error("can't parse format range")
     }
 

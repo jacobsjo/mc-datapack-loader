@@ -18,7 +18,7 @@ export class PackFormat {
 
     public compare(other: PackFormat){
         if (this.major < other.major) return -1
-        if (this.major === other.major) return this.minor - other.minor
+        if (this.major === other.major) return other.minor - this.minor
         return 1
     }
 }

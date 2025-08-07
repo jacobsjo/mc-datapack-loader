@@ -14,7 +14,6 @@
   "homepage": "https://github.com/jacobsjo/mc-datapack-loader",
   "dependencies": {
     "@fireflysemantics/join": "^1.0.14",
-    "deepslate": "^0.22.4",
     "jszip": "^3.10.1",
     "strip-json-comments": "^5.0.0"
   },

@@ -1,6 +1,6 @@
-import { Identifier } from "deepslate"
 import { DatapackList } from "../DatapackList"
 import { ResourceLocation } from "../DataType"
+import { Identifier } from "../Identifier"
 import { AnonymousDatapack, Datapack } from "./Datapack"
 
 export class CompositeDatapack implements AnonymousDatapack {

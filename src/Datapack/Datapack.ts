@@ -1,4 +1,3 @@
-import { Identifier } from "deepslate";
 import { DatapackList } from "../DatapackList";
 import { ResourceLocation } from "../DataType";
 import { FileAccess } from "../FileAccess/FileAccess";
@@ -11,6 +10,7 @@ import { CompositeDatapack } from "./CompositeDatapack";
 import { OverlaiedDatapack } from "./OverlaiedDatapack";
 import { PromiseDatapack } from "./PromiseDatapack";
 import { PackFormat } from "../PackFormat";
+import { Identifier } from "../Identifier";
 
 
 export interface AnonymousDatapack {

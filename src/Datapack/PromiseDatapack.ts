@@ -1,9 +1,9 @@
-import { Identifier } from "deepslate";
 import { ResourceLocation } from "../DataType";
 import { PackMcmeta } from "../PackMcmeta";
 import { Datapack } from "./Datapack";
 import { UNKOWN_PACK } from "../unkown_pack";
 import { PackFormat } from "../PackFormat";
+import { Identifier } from "../Identifier";
 
 
 
