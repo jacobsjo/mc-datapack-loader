@@ -68,7 +68,7 @@ class DL implements DatapackList {
 
     async getDatapacks(): Promise<AnonymousDatapack[]> {
         const mcMeta = await this.mcMeta
-        if (this.packVersion.compare(new PackFormat(15)) ) return [this.mainPack] // no overlays in 1.20.1 and earlier
+        if (this.packVersion.compare(new PackFormat(15)) >= 0 ) return [this.mainPack] // no overlays in 1.20.1 and earlier
         if (mcMeta === undefined) return [this.mainPack]
         if (mcMeta.overlays === undefined) return [this.mainPack]
 
